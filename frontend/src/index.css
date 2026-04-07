@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark {
+  background-color: #111827; /* Contoh warna gelap */
+}
+
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

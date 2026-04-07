@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum UserRole {
+  admin
+  super_admin
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  username     String
+  password     String
+  email        String
+  refreshToken String
+  role         UserRole
+
+  @@index([username, email])
+  @@map("users")
+}
+
+enum StatusDevice {
+  CONNECTED
+  DISCONNECTED
+  CONNECTING
+}
+
+model Device {
+  id     String       @id @default(uuid())
+  name   String
+  number String
+  status StatusDevice @default(CONNECTING)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("devices")
+}
+
+model Knowledge {
+  id         String                       @id @default(uuid())
+  content    String                       @db.Text
+  metadata   Json                         @default("{}")
+  embedding  Unsupported("vector(1024)")?
+  createdAt  DateTime                     @default(now()) @map("created_at")
+  updated_at DateTime                     @updatedAt @map("updated_at")
+
+  @@map("knowledges")
+}
+
+model Message {
+  id         String  @id @default(uuid())
+  // Info WhatsApp (External ID dari Evolution API)
+  whatsappId String? @map("whatsapp_id")
+  fromMe     Boolean @default(false) @map("from_me")
+  remoteJid  String  @map("remote_jid")
+  pushName   String? @map("push_name")
+
+  // Konten Pesan
+  content String @db.Text
+  type    String @default("text") // text, image, document, dll.
+
+  // Metadata & Audit
+  status    String   @default("sent") // sent, delivered, read, failed
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([remoteJid]) // Indexing penting untuk tarik history chat
+  @@map("messages")
+}
+
+model Autoreply {
+  id          String @id @default(uuid())
+
+  // Identitas & Status
+  name     String // Nama aturan (misal: "CS Layanan KTP")
+  isActive Boolean @default(true) @map("is_active")
+
+  // Logic Trigger
+  type           String  @default("keyword") // "keyword", "ai_rag", or "fallback"
+  triggerKeyword String? @map("trigger_keyword") // Hanya isi jika type="keyword"
+
+  // Response Logic
+  replyContent String? @map("reply_content") @db.Text // Jawaban statis (jika bukan AI)
+  aiPrompt     String? @map("ai_prompt") @db.Text // System Prompt khusus buat AI ini
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@map("auto_replies")
+}
+
