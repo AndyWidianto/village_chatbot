@@ -1,47 +1,47 @@
-import React, { useState } from 'react';
-import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter, Info, Tag, MessageSquare, ToggleLeft } from 'lucide-react';
+import useAutoreply from '../../hooks/autoreply';
+import MotionModal from '../../components/Motion';
+import FormModal from '../../components/FormModal';
+import { Input, InputCheckbox, Select, Textarea } from '../../components/Inputs';
 
 export default function AutoReply() {
-  const initialData = [
-    { id: 1, keyword: "Vincent Williamson", type: "keyword", content: "iOS Developer", isActive: false },
-    { id: 2, keyword: "Tyler Reyes", type: "keyword", content: "UI/UX Designer", isActive: true },
-    { id: 3, keyword: "Justin Block", type: "keyword", content: "Front-End Developer", isActive: true },
-    { id: 4, keyword: "Sean Guzman", type: "keyword", content: "Web Designer", isActive: true },
-    { id: 5, keyword: "Keith Carter", type: "keyword", content: "Graphic Designer", isActive: true },
-    { id: 6, keyword: "Austin Medina", type: "rag", content: "Photographer", isActive: true },
-    { id: 7, keyword: "Adam Henderson", type: "default", content: "UI/UX Designer", isActive: true },
-  ];
-
-  const [users, setUsers] = useState(initialData);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  // --- Logika Search & Filter ---
-  const filteredUsers = users.filter(user =>
-    user.keyword.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // --- Logika Pagination ---
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-
-  // --- Handlers ---
-  const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter(u => u.id !== id));
-    }
-  };
-
-  const handleUpdate = (name: string) => {
-    alert(`Update logic for ${name} goes here!`);
-  };
+  const {
+    setSearchTerm,
+    autoreplies,
+    handleDelete,
+    handleUpdate,
+    indexOfFirstItem,
+    currentPage,
+    totalPages,
+    indexOfLastItem,
+    handleClose,
+    isOpen,
+    selected,
+    updateAutoreply,
+    setFormData,
+    formData,
+    loading,
+    handleCurrent,
+    handlePrev
+  } = useAutoreply();
 
   return (
     <div className="md:p-8 min-h-screen dark:bg-background dark:text-white">
+      <MotionModal onClose={handleClose} isOpen={isOpen}>
+        <FormModal title='Update Autoreply' onClose={handleClose} onSave={updateAutoreply} loading={loading}>
+          <div className="grid grid-cols-2 gap-4">
+            <Input icon={Tag} onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))} title='Keyword' value={selected?.name || ""} />
+            <Select title='Type' onChange={(e) => setFormData(prev => ({...prev, type: e.target.value}))} value={selected?.type || "keyword"}>
+              <option value="">Select type</option>
+              <option value="keyword">Keyword</option>
+              <option value="ai_rag">AI RAG</option>
+            </Select>
+          </div>
+          {formData.type === "keyword" ? <Textarea icon={MessageSquare} title='Response Content' onChange={(e) => setFormData(prev => ({...prev, replyContent: e.target.value}))} value={selected?.replyContent || ""} /> :
+          <Textarea icon={MessageSquare} title='Prompt AI' onChange={(e) => setFormData(prev => ({...prev, aiPrompt: e.target.value}))} value={selected?.aiPrompt || ""} />}
+          <InputCheckbox title='Status' icon={ToggleLeft} isActive={selected?.isActive || false}/>
+        </FormModal>
+      </MotionModal>
       <div className="w-full mx-1 md:mx-auto space-y-4">
 
         {/* Toolbar: Search & Filter */}
@@ -52,7 +52,7 @@ export default function AutoReply() {
               type="text"
               placeholder="Search name or job..."
               className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setTimeout(() => setSearchTerm(e.target.value), 500)}
             />
           </div>
 
@@ -67,6 +67,7 @@ export default function AutoReply() {
             <table className="w-full min-w-[1000px] text-left dark:border-collapse dark:bg-[#111827]">
               <thead>
                 <tr className="bg-[#6366f1]">
+                  <th className="px-6 py-4 font-semibold text-sm">No.</th>
                   <th className="px-6 py-4 font-semibold text-sm">Keyword</th>
                   <th className="px-6 py-4 font-semibold text-sm">Type</th>
                   <th className="px-6 py-4 font-semibold text-sm">Content</th>
@@ -76,14 +77,15 @@ export default function AutoReply() {
               </thead>
 
               <tbody className="divide-y divide-gray-400 dark:divide-gray-800">
-                {currentItems.length > 0 ? (
-                  currentItems.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors group">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">{user.keyword}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">{user.type}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">{user.content}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">
-                        {user.isActive ? (
+                {autoreplies.length > 0 ? (
+                  autoreplies.map((autoreply, idx) => (
+                    <tr key={autoreply.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
+                      <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{autoreply.name}</td>
+                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type}</td>
+                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{ autoreply.type === "keyword" ? autoreply.replyContent : autoreply.aiPrompt}</td>
+                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">
+                        {autoreply.isActive ? (
                           <span className="px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-bold">Active</span>
                         ) : (
                           <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded-full text-xs font-bold">Inactive</span>
@@ -91,18 +93,39 @@ export default function AutoReply() {
                       </td>
                       <td className="px-6 py-4 text-sm text-center">
                         <div className="flex justify-center gap-3">
-                          <button
-                            onClick={() => handleUpdate(user.keyword)}
-                            className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
-                          >
-                            <Edit3 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="relative group">
+                            <button
+                              onClick={() => handleDelete(autoreply.id)}
+                              className="p-1.5 bg-green-600/10 text-green-400 rounded-md hover:bg-green-500 hover:text-white transition"
+                            >
+                              <Info size={16} />
+                            </button>
+                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              View Details
+                            </div>
+                          </div>
+                          <div className="relative group">
+                            <button
+                              onClick={() => handleUpdate(autoreply)}
+                              className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              Update
+                            </div>
+                          </div>
+                          <div className="relative group">
+                            <button
+                              onClick={() => handleDelete(autoreply.id)}
+                              className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              Delete
+                            </div>
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -120,12 +143,12 @@ export default function AutoReply() {
         {/* Pagination Control */}
         <div className="flex justify-between items-center dark:bg-[#111827] p-4 rounded-xl border border-gray-300 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Showing <span className="text-white font-medium">{indexOfFirstItem + 1}</span> to <span className="text-gray-900 dark:text-white font-medium">{Math.min(indexOfLastItem, filteredUsers.length)}</span> of <span className="text-white font-medium">{filteredUsers.length}</span> entries
+            Showing <span className="text-white font-medium">{indexOfFirstItem + 1}</span> to <span className="text-gray-900 dark:text-white font-medium">{Math.min(indexOfLastItem, autoreplies.length)}</span> of <span className="text-white font-medium">{autoreplies.length}</span> entries
           </p>
 
           <div className="flex gap-2">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={handlePrev}
               disabled={currentPage === 1}
               className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-700 transition"
             >
@@ -135,7 +158,7 @@ export default function AutoReply() {
               Page {currentPage} of {totalPages || 1}
             </div>
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={handleCurrent}
               disabled={currentPage === totalPages || totalPages === 0}
               className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-700 transition"
             >

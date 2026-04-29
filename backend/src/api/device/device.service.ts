@@ -1,30 +1,76 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../lib/prisma/prisma.service';
+import { EvolutionService } from '@/lib/evolutions/evolutions.service';
+import { CreateDevice } from '@/lib/types';
 
 
 @Injectable()
 export class DeviceService {
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    private evolution: EvolutionService
   ) { }
 
-  async create(createDeviceDto: any) {
-    return this.prisma.device.create({
-      data: {
-        ...createDeviceDto,
-        status: "CONNECTING"
-      }
+  async create({ name, instanceName }: CreateDevice) {
+    const instance = await this.evolution.createInstance({ instanceName });
+    const newDevice = await this.prisma.device.create({
+      data: { id: instance.instance.instanceId, name, instanceName }
+    });
+    await this.setWebhook(instanceName, `api/webhook/${newDevice.id}`);
+    return {
+      ...newDevice,
+      status: instance?.connectionStatus ?? 'disconnected',
+      instanceName: instance?.name ?? newDevice.instanceName,
+      integration: instance?.integration ?? 'UNKNOWN'
+    };
+  }
+
+  async setWebhook(instanceName: string, url: string) {
+    const baseUrl = process.env.BASE_URL;
+    await this.evolution.setWebhook({ instance: instanceName, url: `${baseUrl}/${url}` });
+    return { message: "Setting webhook successfully" }
+  }
+
+  async connectDevice(id: string) {
+    const device = await this.getOne(id)
+    const instance = await this.evolution.instanceConnect(device.instanceName);
+    return instance;
+  }
+
+  async getAll() {
+    const devices = await this.prisma.device.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    const instances = await this.evolution.getInstances();
+
+    const instanceMap = new Map(instances.map((i: any) => [i.id, i]));
+
+    return devices.map(device => {
+      const instance: any = instanceMap.get(device.id);
+
+      return {
+        ...device,
+        status: instance?.connectionStatus ?? 'disconnected',
+        instanceName: instance?.name ?? device.instanceName,
+        integration: instance?.integration ?? 'UNKNOWN'
+      };
     });
   }
 
-  async getAll({ cursor, limitStr, offsetStr }: { cursor?: string, limitStr?: string, offsetStr?: string }) {
-    const limit = limitStr ? parseInt(limitStr) : 10;
-    const offset = offsetStr ? parseInt(offsetStr) : 0;
-    return this.prisma.device.findMany({
-      take: limit,
-      cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { createdAt: 'desc' },
-      skip: 1,
-    });
+  async getOne(id: string) {
+    const existing = await this.prisma.device.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("device not found");
+    }
+    return existing;
+  }
+
+  async delete(id: string) {
+    const device = await this.getOne(id);
+    await this.evolution.instanceDelete(device.instanceName);
+    await this.prisma.device.delete({
+      where: { id: device.id }
+    })
+    return { message: "Delete device successfully" };
   }
 }

@@ -1,18 +1,34 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { DeviceService } from './device.service';
+import { CreateDeviceDto } from '@/lib/dto/device.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 
-@Controller('api/device')
+@Controller('api/devices')
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
     @Post()
-    create(@Body() createDeviceDto: any) {
+    @UseGuards(AuthGuard("jwt"))
+    async create(@Body() createDeviceDto: CreateDeviceDto) {
         return this.deviceService.create(createDeviceDto);
     }
 
     @Get()
-    getAll(@Query() query: { cursor?: string, limitStr?: string, offsetStr?: string }) {
-        return this.deviceService.getAll(query);
+    @UseGuards(AuthGuard("jwt"))
+    async getAll() {
+        return this.deviceService.getAll();
+    }
+
+    @Post("connection/:id")
+    @UseGuards(AuthGuard("jwt"))
+    async connectionDevice(@Param("id") id: string) {
+        return this.deviceService.connectDevice(id);
+    }
+
+    @Delete(":id")
+    @UseGuards(AuthGuard("jwt"))
+    async deleteDevice(@Param("id") id: string) {
+        return this.deviceService.delete(id);
     }
 }

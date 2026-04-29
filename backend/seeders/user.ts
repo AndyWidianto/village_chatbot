@@ -1,0 +1,66 @@
+const { PrismaClient, UserRole } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
+
+const prisma = new PrismaClient();
+
+export async function userSeeders() {
+  console.log('🌱 Seeding users...');
+
+
+  const users = [
+    {
+      name: 'Andy Widianto',
+      email: 'andy@evolve.id',
+      password: "password1234",
+      role: UserRole.admin,
+      username: "andy124",
+      updatedAt: new Date(), 
+    },
+    {
+      name: 'Budi Santoso',
+      email: 'budi@desa.go.id',
+      password: "password1234",
+      role: UserRole.admin,
+      username: "budy1234",
+      updatedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), // Inaktif (2 hari lalu)
+    },
+    {
+      name: 'Siti Aminah',
+      email: 'siti@desa.go.id',
+      password: "password1234",
+      role: UserRole.admin,
+      username: "siti123",
+      updatedAt: new Date(),
+    },
+    {
+      name: 'Admin Desa',
+      email: 'admin@desa.go.id',
+      password: "password1234",
+      role: UserRole.admin,
+      username: "admin1234",
+      updatedAt: new Date(),
+    },
+    {
+      name: 'User Testing',
+      email: 'test@example.com',
+      password: "password1234",
+      role: UserRole.admin,
+      username: "test1234",
+      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+  ];
+
+  for (const user of users) {
+    const hashPassword = await bcrypt.hash(user.password, 10);
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: {
+        ...user,
+        password: hashPassword
+      },
+    });
+  }
+
+  console.log('✅ User seeding completed.');
+}

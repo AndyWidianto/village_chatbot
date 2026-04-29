@@ -1,11 +1,5 @@
-import {
-  LogOut,
-  X
-} from "lucide-react";
+import { LogOut, X, ChevronRight } from "lucide-react";
 import { NavLink } from "react-router";
-import { ButtonDanger } from "./Buttons";
-
-
 
 interface SidebarProps {
   openSidebar: boolean;
@@ -17,52 +11,97 @@ interface SidebarProps {
 export default function Sidebar({ sidebars, openSidebar, handleToggleSidebar, handleHeaderContent }: SidebarProps) {
   return (
     <>
-      {openSidebar && <div className="fixed inset-0 bg-black/50 z-40 block lg:hidden" onClick={() => handleToggleSidebar()}></div>}
-      <aside className={`w-60 pt-10 bg-gray-100 dark:bg-background flex flex-col pl-2 pr-8 border-r border-gray-400 dark:border-gray-800 fixed top-0 h-screen transition-all duration-300 ${openSidebar ? 'left-0' : '-left-full lg:left-0'} z-50`}>
-        <button onClick={() => handleToggleSidebar()} className="lg:hidden text-gray-400 absolute top-4 right-4">
-          <X size={20} />
+      {/* Overlay dengan backdrop blur */}
+      {openSidebar && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 block lg:hidden transition-opacity" 
+          onClick={handleToggleSidebar}
+        ></div>
+      )}
+
+      <aside className={`w-64 bg-white dark:bg-[#0f172a] flex flex-col border-r border-gray-200 dark:border-slate-800 fixed top-0 h-screen transition-all duration-300 ease-in-out ${openSidebar ? 'left-0' : '-left-full lg:left-0'} z-50`}>
+        
+        {/* Close Button Mobile */}
+        <button onClick={handleToggleSidebar} className="lg:hidden text-gray-500 hover:text-gray-700 absolute top-5 right-4 p-1">
+          <X size={22} />
         </button>
 
-        <div className="flex items-center gap-3 mb-12 px-2">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 bg-white rounded-full"></div>
+        {/* Logo Section */}
+        <div className="flex items-center gap-3 px-6 h-20 mb-4">
+          <div className="w-9 h-9 bg-gradient-to-tr from-orange-600 to-orange-400 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+            <div className="w-4 h-4 bg-white rounded-sm rotate-45"></div>
           </div>
-          <h1 className="text-2xl font-bold text-orange-500">Teamify</h1>
+          <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Evolve<span className="text-orange-500">WA</span>
+          </span>
         </div>
 
-        <nav className="space-y-6 h-[75%] overflow-y-auto scrollbar-hidden">
+        {/* Navigation Section */}
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {sidebars.map((item: any) => (
-            item.label.toLowerCase() !== "line" ? <div key={item.id}>
-              {item.type === "single" ? (
-                <NavItem icon={item.icon} label={item.label} path={item.path} description={item.description} setHeaderContent={handleHeaderContent} />
-              ) : (
-                <div>
-                  <div className="flex items-center gap-4 cursor-pointer transition text-gray-600 dark:text-gray-200">
-                    {item.icon}
-                    <span className="font-medium">{item.label}</span>
-                  </div>
-                  <div className="ml-2 mt-2 space-y-2">
-                    {item.subMenu.map((subItem: any) => (
-                      <NavItem key={subItem.id} icon={subItem.icon} label={subItem.label} path={subItem.path} description={subItem.description} setHeaderContent={handleHeaderContent} />
-                    ))}
-                  </div>
+            item.type === "single" ? (
+              <NavItem 
+                key={item.id}
+                icon={item.icon} 
+                label={item.label} 
+                path={item.path} 
+                description={item.description} 
+                setHeaderContent={handleHeaderContent} 
+              />
+            ) : (
+              <div key={item.id} className="py-2">
+                <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                  {item.label}
                 </div>
-              )}
-            </div> : <hr className="border-gray-400 dark:border-gray-800 my-4" />
+                <div className="space-y-1">
+                  {item.subMenu.map((subItem: any) => (
+                    <NavItem 
+                      key={subItem.id} 
+                      icon={subItem.icon} 
+                      label={subItem.label} 
+                      path={subItem.path} 
+                      description={subItem.description} 
+                      setHeaderContent={handleHeaderContent} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )
           ))}
         </nav>
-        <ButtonDanger onClick={() => alert('Logout logic goes here!')}>
-          <LogOut size={20} />
-          Logout
-        </ButtonDanger>
+
+        {/* Bottom Section / Logout */}
+        <div className="p-4 border-t border-gray-100 dark:border-slate-800">
+          <button 
+            onClick={() => alert('Logout logic...')}
+            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all duration-200"
+          >
+            <LogOut size={18} />
+            <span>Keluar Sesi</span>
+          </button>
+        </div>
       </aside>
     </>
   )
 }
 
 const NavItem = ({ icon, label, path, setHeaderContent, description }: any) => (
-  <NavLink to={path} end className={({ isActive }) => `flex items-center gap-4 cursor-pointer transition ${isActive ? 'text-gray-800 dark:text-text-primary' : 'text-gray-600 dark:text-text-secondary hover:text-gray-800 dark:hover:text-white'}`} onClick={() => setHeaderContent && setHeaderContent({ title: label, description })}>
-    {icon}
-    <span className="font-medium">{label}</span>
+  <NavLink 
+    to={path} 
+    end 
+    className={({ isActive }) => `
+      group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+      ${isActive 
+        ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-500 shadow-sm' 
+        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
+      }
+    `}
+    onClick={() => setHeaderContent && setHeaderContent({ title: label, description })}
+  >
+    <span className="transition-transform duration-200 group-hover:scale-110">
+      {icon}
+    </span>
+    <span className="flex-1">{label}</span>
+    <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
   </NavLink>
 );

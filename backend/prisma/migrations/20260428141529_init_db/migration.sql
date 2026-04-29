@@ -2,20 +2,19 @@
 CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('admin', 'super_admin');
-
--- CreateEnum
-CREATE TYPE "StatusDevice" AS ENUM ('CONNECTED', 'DISCONNECTED', 'CONNECTING');
+CREATE TYPE "UserRole" AS ENUM ('admin', 'super_admin', 'review');
 
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" TEXT,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "refreshToken" TEXT NOT NULL,
+    "refreshToken" TEXT,
     "role" "UserRole" NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -24,8 +23,8 @@ CREATE TABLE "users" (
 CREATE TABLE "devices" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "number" TEXT NOT NULL,
-    "status" "StatusDevice" NOT NULL DEFAULT 'CONNECTING',
+    "number" TEXT,
+    "instanceName" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -35,8 +34,8 @@ CREATE TABLE "devices" (
 -- CreateTable
 CREATE TABLE "knowledges" (
     "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
     "content" TEXT NOT NULL,
-    "metadata" JSONB NOT NULL DEFAULT '{}',
     "embedding" vector(1024),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -74,6 +73,12 @@ CREATE TABLE "auto_replies" (
 
     CONSTRAINT "auto_replies_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "users_username_email_idx" ON "users"("username", "email");

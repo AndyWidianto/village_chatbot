@@ -1,23 +1,39 @@
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
 import {
   LayoutDashboard,
   CheckSquare, Settings,
-  Box,
-  TabletSmartphone,
-  ClipboardList,
   CalendarCheck,
   CirclePlus,
+  Sparkles,
+  Bot,
 } from "lucide-react";
+import MotionModal from './Motion';
+import ChatModal from './ChatModal';
+import useSocket from '../lib/socket';
+import NotificationModal from './NotificationModal';
+import { useAuthStore } from '../lib/store/authStore';
+import useChatbot from '../hooks/chatbot';
 
+
+interface IncomeMessage {
+  name: string;
+  message: string;
+  number: string;
+}
 export default function Layout() {
+  const { accessToken } = useAuthStore();
+  const { socket } = useSocket({ accessToken });
   const [openSidebar, setOpenSidebar] = useState(true);
   const [headerContent, setHeaderContent] = useState({
     title: "Dashboard",
     description: ""
   });
+  const [isOpenChat, setIsOpenChat] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [incomeMessage, setIncomeMessage] = useState<IncomeMessage | null>(null);
   const sidebars = [
     {
       id: 1,
@@ -52,29 +68,29 @@ export default function Layout() {
       ]
     },
 
-    {
-      id: 3,
-      type: "group",
-      active: false,
-      label: 'Broadcasts',
-      description: 'Kirim pesan massal ke banyak pengguna',
-      subMenu: [
-        {
-          id: 31,
-          label: 'Broadcasts',
-          description: 'Daftar pesan broadcast',
-          icon: <ClipboardList size={20} />,
-          path: '/dashboard/broadcasts'
-        },
-        {
-          id: 32,
-          label: 'Create Broadcast',
-          description: 'Buat dan kirim pesan broadcast baru',
-          icon: <CirclePlus size={20} />,
-          path: '/dashboard/broadcasts/create'
-        },
-      ]
-    },
+    // {
+    //   id: 3,
+    //   type: "group",
+    //   active: false,
+    //   label: 'Broadcasts',
+    //   description: 'Kirim pesan massal ke banyak pengguna',
+    //   subMenu: [
+    //     {
+    //       id: 31,
+    //       label: 'Broadcasts',
+    //       description: 'Daftar pesan broadcast',
+    //       icon: <ClipboardList size={20} />,
+    //       path: '/dashboard/broadcasts'
+    //     },
+    //     {
+    //       id: 32,
+    //       label: 'Create Broadcast',
+    //       description: 'Buat dan kirim pesan broadcast baru',
+    //       icon: <CirclePlus size={20} />,
+    //       path: '/dashboard/broadcasts/create'
+    //     },
+    //   ]
+    // },
 
     {
       id: 4,
@@ -101,25 +117,6 @@ export default function Layout() {
     },
 
     {
-      id: 5,
-      type: "single",
-      active: false,
-      label: 'Devices',
-      description: 'Kelola perangkat yang terhubung ke sistem',
-      icon: <TabletSmartphone size={20} />,
-      path: '/dashboard/devices'
-    },
-
-    {
-      id: 6,
-      type: "single",
-      label: 'Line',
-      description: 'Integrasi layanan LINE messaging',
-      icon: <Box size={20} />,
-      path: '/dashboard/line'
-    },
-
-    {
       id: 8,
       type: "single",
       label: 'Settings',
@@ -128,10 +125,30 @@ export default function Layout() {
       path: '/dashboard/settings'
     }
   ];
+  const { messages, setMessage, message, handleChatbot, loading } = useChatbot({ sessionId: sessionId || "" });
 
   const toggleSidebar = () => {
     setOpenSidebar(!openSidebar);
   }
+  const handleClose = () => {
+    setIsOpenChat(false);
+    setIncomeMessage(null);
+  }
+
+  const setRandomId = () => {
+    const id = crypto.randomUUID();
+    setSessionId(id);
+  };
+  useEffect(() => {
+    setRandomId();
+    socket.on("connect", () => {
+      console.log("connect successfully");
+    })
+    socket.on("receiver_message", (data) => {
+      console.log(data);
+      setIncomeMessage(data);
+    })
+  }, []);
 
   return (
     <div className="flex min-h-screen p-6 bg-gray-100 dark:bg-background dark:text-white w-full h-full">
@@ -142,7 +159,38 @@ export default function Layout() {
       <main className={`flex-1 min-w-0 md:pl-2 ${openSidebar ? 'lg:ml-55' : 'ml-0 lg:ml-55'} transition-all duration-300`}>
         <Header handleToggleSidebar={toggleSidebar} headerContent={headerContent} />
         <div className="mt-15"></div>
-        <Outlet />
+        <div className="pl-4">
+          <Outlet />
+        </div>
+        <button
+          onClick={() => setIsOpenChat(true)}
+          className="fixed right-6 bottom-6 group flex items-center gap-3 transition-all duration-300"
+        >
+          {/* Tooltip/Label yang muncul saat hover */}
+          <span className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white dark:bg-slate-800 shadow-xl border dark:border-slate-700 px-4 py-2 rounded-2xl text-sm font-bold text-indigo-600 dark:text-indigo-400 pointer-events-none">
+            Tanya AI Desa
+          </span>
+
+          {/* Main Button Container */}
+          <div className="relative">
+            {/* Efek Ping/Pulsing di belakang tombol */}
+            <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-20"></div>
+
+            {/* Tombol Utama */}
+            <div className="relative w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl shadow-lg shadow-indigo-500/40 flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 group-active:scale-95">
+              <Bot className="w-7 h-7" />
+
+              {/* Badge Aksesoris (Sparkles) */}
+              <div className="absolute -top-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-lg shadow-sm">
+                <Sparkles className="w-3 h-3 fill-current" />
+              </div>
+            </div>
+          </div>
+        </button>
+        <MotionModal onClose={handleClose} isOpen={isOpenChat}>
+          <ChatModal sessionId={sessionId || ""} onClose={handleClose} isOpen={isOpenChat} messages={messages} setMessage={setMessage} message={message} handleChatbot={handleChatbot} loading={loading} />
+        </MotionModal>
+        <NotificationModal isVisible={incomeMessage !== null} message={incomeMessage?.message || ""} senderName={incomeMessage?.name || ""} onClose={handleClose} />
       </main>
     </div>
   );

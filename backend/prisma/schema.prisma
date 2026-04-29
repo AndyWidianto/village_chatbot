@@ -4,12 +4,12 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
   url        = env("DATABASE_URL")
   extensions = [vector]
 }
@@ -17,32 +17,31 @@ datasource db {
 enum UserRole {
   admin
   super_admin
+  review
 }
 
 model User {
   id           String   @id @default(uuid())
-  name         String
-  username     String
+  name         String?
+  username     String   @unique
   password     String
-  email        String
-  refreshToken String
+  email        String   @unique
+  refreshToken String?
   role         UserRole
+
+  notifications Notification[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([username, email])
   @@map("users")
 }
 
-enum StatusDevice {
-  CONNECTED
-  DISCONNECTED
-  CONNECTING
-}
-
 model Device {
-  id     String       @id @default(uuid())
-  name   String
-  number String
-  status StatusDevice @default(CONNECTING)
+  id           String  @id @default(uuid())
+  name         String
+  number       String?
+  instanceName String  @default("")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -51,12 +50,12 @@ model Device {
 }
 
 model Knowledge {
-  id         String                       @id @default(uuid())
-  content    String                       @db.Text
-  metadata   Json                         @default("{}")
-  embedding  Unsupported("vector(1024)")?
-  createdAt  DateTime                     @default(now()) @map("created_at")
-  updated_at DateTime                     @updatedAt @map("updated_at")
+  id        String                       @id @default(uuid())
+  name      String                       @default("")
+  content   String                       @db.Text
+  embedding Unsupported("vector(1024)")?
+  createdAt DateTime                     @default(now()) @map("created_at")
+  updatedAt DateTime                     @updatedAt @map("updated_at")
 
   @@map("knowledges")
 }
@@ -83,7 +82,7 @@ model Message {
 }
 
 model Autoreply {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
   // Identitas & Status
   name     String // Nama aturan (misal: "CS Layanan KTP")
@@ -103,4 +102,19 @@ model Autoreply {
   @@index([isActive])
   @@map("auto_replies")
 }
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  type      String   // 'info', 'warning', 'error', 'success'
+  isRead    Boolean  @default(false)
+  userId    String?   
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
 

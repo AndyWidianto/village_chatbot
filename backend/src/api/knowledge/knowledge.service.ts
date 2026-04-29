@@ -1,0 +1,214 @@
+import { PrismaService } from "@/lib/prisma/prisma.service";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { CreateKnowledgeAI, PayloadJWT } from "@/lib/types";
+import * as XLSX from 'xlsx';
+import { Prisma } from "@prisma/client";
+import { OllamaService } from "@/lib/ollama/ollama.service";
+import { TypeNotification } from "@/lib/shared/notification";
+
+const pdf = require("pdf-parse");
+
+
+
+@Injectable()
+export class KnowledgeService {
+    constructor(
+        private prisma: PrismaService,
+        private ollama: OllamaService
+    ) { }
+
+    async createKnowledge(user: PayloadJWT, data: CreateKnowledgeAI) {
+        let rawText = data.content || '';
+        let chunks: string[] = [];
+        const chunkSize = 1000;
+        const chunkOverlap = 200;
+
+        if (data.file) {
+            const mimetype = data.file.mimetype;
+
+            if (mimetype === 'application/pdf') {
+                const pdfData = await pdf(data.file.buffer);
+                rawText = pdfData.text;
+            }
+            else if (mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || mimetype === 'application/vnd.ms-excel') {
+                const workbook = XLSX.read(data.file.buffer, { type: 'buffer' });
+                const allRows = workbook.SheetNames.flatMap(sheetName => {
+                    return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                });
+
+                if (allRows.length > 0) {
+                    chunks = allRows.map((row: any) => {
+                        return Object.entries(row)
+                            .map(([key, val]) => `${key}: ${val}`)
+                            .join(", ");
+                    });
+                }
+            }
+            else if (mimetype === 'text/plain') {
+                rawText = data.file.buffer.toString('utf-8');
+            }
+            else {
+                throw new BadRequestException("Format file tidak didukung (Gunakan PDF, Excel, atau TXT)");
+            }
+        }
+
+        if (rawText && rawText.trim()) {
+            chunks = this.splitText(rawText, chunkSize, chunkOverlap);
+        }
+
+        const chunkData = await Promise.all(chunks.map(async (chunk) => {
+            const vector = await this.ollama.embeddings(chunk);
+            return {
+                content: chunk,
+                vector: `[${vector.join(',')}]`
+            };
+        }));
+
+        const values = chunkData.map((d) => {
+            return Prisma.sql`(
+                gen_random_uuid(), 
+                ${data.name},
+                ${d.content}, 
+                ${d.vector}::vector, 
+                now(), 
+                now()
+            )`;
+        });
+
+        await this.prisma.$executeRaw`
+            INSERT INTO "knowledges" (
+                "id", 
+                "name",
+                "content", 
+                "embedding", 
+                "created_at", 
+                "updated_at"
+            ) 
+            VALUES ${Prisma.join(values)}
+        `;
+
+
+        await this.prisma.notification.create({
+            data: {
+                title: `${user.name} CREATE KNOWLEDGE AI`,
+                content: data.name,
+                type: TypeNotification.success,
+                isRead: false
+            }
+        });
+
+        return {
+            message: "Knowledge processed and vectorized",
+            totalChunks: chunks.length
+        };
+    }
+
+    private splitText(text: string, size: number, overlap: number): string[] {
+        const chunks: string[] = [];
+        let i = 0;
+        const cleanText = text.replace(/\0/g, '').trim();
+
+        while (i < cleanText.length) {
+            chunks.push(cleanText.slice(i, i + size));
+            i += size - overlap;
+        }
+        return chunks;
+    }
+
+
+    async getAllKnowledge(lastId?: string, limitStr?: string, search?: string) {
+        let limit = 10;
+        if (limitStr && limitStr.trim()) {
+            limit = Number(limitStr);
+        }
+
+        const query: any = {
+            take: limit,
+            orderBy: { id: 'asc' },
+        };
+
+        if (lastId) {
+            query.cursor = { id: lastId };
+            query.skip = 1;
+        }
+        if (search) {
+            query.where = {
+                OR: [
+                    {
+                        name: {
+                            contains: search,
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        content: {
+                            contains: search,
+                            mode: 'insensitive'
+                        }
+                    },
+                ]
+            };
+        }
+
+        const [knowledges, totalKnowledge] = await this.prisma.$transaction([
+            this.prisma.knowledge.findMany(query),
+            this.prisma.knowledge.count()
+        ]);
+        const totalPage = Math.ceil(totalKnowledge / limit);
+        const nextCursor = knowledges.length === limit ? knowledges[knowledges.length - 1].id : null;
+
+        return {
+            knowledges,
+            totalPage,
+            nextCursor,
+            totalData: totalKnowledge
+        };
+    }
+
+    async findOne(id: string) {
+        const existing = await this.prisma.knowledge.findFirst({
+            where: { id }
+        });
+        if (!existing) {
+            throw new NotFoundException("Knowledge not found");
+        }
+        return existing;
+    }
+
+    async deleteKnowledge(user: PayloadJWT, id: string) {
+        const exisitng = await this.findOne(id);
+        await this.prisma.knowledge.delete({
+            where: { id: exisitng.id }
+        });
+        await this.prisma.notification.create({
+            data: {
+                title: `${user.name} UPDATE KNOWLEDGE AI`,
+                content: `Delete Knowledge AI ${Object.entries(exisitng).join(', ')}`,
+                type: TypeNotification.success,
+                isRead: false
+            }
+        });
+        return { message: "Delete knowledge successfully" };
+    }
+
+    async updateKnowledge(user: PayloadJWT, id: string, data: Partial<CreateKnowledgeAI>) {
+        const existing = await this.findOne(id);
+        const updateKnowledge = await this.prisma.knowledge.update({
+            where: { id: existing.id },
+            data: data
+        });
+        const updateDetails = Object.entries(data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(' | ');
+
+        await this.prisma.notification.create({
+            data: {
+                title: `${user.name} UPDATE KNOWLEDGE AI`,
+                content: updateDetails,
+                type: TypeNotification.success,
+                isRead: false
+            }
+        });
+        return updateKnowledge;
+    }
+}

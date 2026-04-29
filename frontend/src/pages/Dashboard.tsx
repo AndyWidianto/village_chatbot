@@ -1,11 +1,19 @@
-import type { ApexOptions } from 'apexcharts';
 import Chart from 'react-apexcharts';
 import { useTheme } from '../ThemeProvider';
+import useAxios from '../lib/axios.service';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 
 
 export default function Dashboard() {
     const { theme } = useTheme();
+    const { axiosPrivate } = useAxios();
+    const [stats, setStasts] = useState({
+        activeUser: 0,
+        inactiveUser: 0,
+        totalUser: 0
+    });
     const lineChartOptions: any = {
         chart: { type: 'line', toolbar: { show: false }, background: 'transparent' },
         stroke: { curve: 'smooth', width: 3 },
@@ -25,94 +33,132 @@ export default function Dashboard() {
         { name: 'Target', data: [4, 5, 3, 5, 6, 4] }
     ];
 
-    const pieChartSeries = [44, 55, 13, 43, 22];
-    const pieChartOptions: ApexOptions = {
-        chart: {
-            type: 'pie',
-        },
-        labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-        legend: {
-            labels: {
-                colors: theme === 'dark' ? '#ffffff' : '#000000'
-            }
-        },
-  stroke: {
-    show: false
-  },
-        responsive: [{
-            breakpoint: 480,
-            options: {
-                chart: {
-                    width: 200
+    const fetchStatUser = async () => {
+        try {
+            const res = await axiosPrivate.get(`/users/stats`);
+            const data = res.data;
+            console.log(data);
+            setStasts(prev => ({...prev, activeUser: data.active, inactiveUser: data.inactive, totalUser: data.total }))
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Gagal mengambil data autoreply";
+            toast.error(errorMessage, {
+                duration: 4000,
+                position: 'top-right',
+                style: {
+                    borderRadius: '12px',
+                    background: '#1e293b',
+                    color: '#fff',
                 },
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }]
-    };
+            });
+
+            console.error("Fetch Error:", err);
+        }
+    }
+
+    useEffect(() => {
+        fetchStatUser();
+    }, [])
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* Top Row */}
-            <div className="md:col-span-6 lg:col-span-4 bg-white/80 backdrop-blur border border-gray-200 dark:border-gray-600 shadow-md rounded-2xl p-5 dark:bg-[#1E1E1E] rounded-3xl">
-                <h3 className="mb-1 md:mb-4 font-medium">Device Activity</h3>
-                <div id="chart" className='dark:text-white'>
-                    <Chart options={pieChartOptions} series={pieChartSeries} type="pie" height={180} />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-2">
+            {/* Row 1: Device Activity */}
+            {/* <div className="md:col-span-12 lg:col-span-4 group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-[2rem] p-6">
+                <div className="flex flex-col gap-1 mb-6">
+                    <h3 className="font-semibold text-slate-800 dark:text-slate-100 tracking-tight">Device Activity</h3>
+                    <p className="text-xs text-slate-500">Monitoring real-time sessions</p>
                 </div>
-            </div>
+                <div id="chart" className="flex justify-center items-center">
+                    <Chart options={pieChartOptions} series={pieChartSeries} type="pie" height={200} />
+                </div>
+            </div> */}
 
-            <div className="md:col-span-6 lg:col-span-4 bg-white/80 backdrop-blur border border-gray-200 dark:border-gray-600 shadow-md rounded-2xl dark:bg-[#1E1E1E] p-5 rounded-3xl flex flex-col">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-medium">Employees</h3>
-                    <select className="bg-transparent text-xs text-gray-800 dark:text-gray-400 border-none outline-none">
-                        <option>Aug 25-Sept 25</option>
+            {/* Row 1: Employee Overview */}
+            <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-6 flex flex-col">
+                <div className="flex justify-between items-start mb-8">
+                    <div>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100 tracking-tight">Employees</h3>
+                        <p className="text-xs text-slate-500">Headcount distribution</p>
+                    </div>
+                    <select className="bg-slate-50 dark:bg-slate-800 text-[10px] font-medium py-1 px-2 rounded-lg border-none ring-1 ring-slate-200 dark:ring-slate-700 outline-none">
+                        <option>Aug 25 - Sept 25</option>
                     </select>
                 </div>
-                <div className="flex items-center justify-between flex-1">
-                    <div className="space-y-4">
-                        <StatItem label="Inactive" value="254" color="text-orange-400" />
-                        <StatItem label="Active" value="3000" color="text-red-400" />
-                        <StatItem label="Total" value="3254" color="text-gray-800 dark:text-white" />
+                <div className="flex items-center justify-between flex-1 gap-4">
+                    <div className="md:block lg:flex gap-4 space-y-5">
+                        <StatItem label="Inactive" value={stats.inactiveUser} color="bg-orange-400" />
+                        <StatItem label="Active" value={stats.activeUser} color="bg-emerald-400" />
+                        <StatItem label="Total" value={stats.totalUser} color="bg-slate-800 dark:bg-white" />
                     </div>
-                    {/* Placeholder for Radial/Circle Chart */}
-                    <div className="w-32 h-32 border-4 border-gray-800 rounded-full flex items-center justify-center relative">
-                        <div className="w-16 h-16 rounded-full overflow-hidden">
-                            <img src="https://i.pravatar.cc/150?u=emp" alt="emp" />
+
+                    {/* Enhanced Progress Circle */}
+                    <div className="relative flex items-center justify-center">
+                        <div className="w-36 h-36 border-[10px] border-slate-100 dark:border-slate-800 rounded-full"></div>
+                        <div className="absolute w-36 h-36 border-[10px] border-orange-500 border-t-transparent border-l-transparent rounded-full rotate-45"></div>
+                        <div className="absolute w-30 h-30 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden shadow-xl">
+                            <img src="https://i.pravatar.cc/150?u=emp" alt="emp" className="object-cover" />
                         </div>
-                        <div className="absolute inset-0 border-t-4 border-orange-400 rounded-full"></div>
                     </div>
                 </div>
             </div>
 
-            <div className="md:col-span-6 lg:col-span-4 space-y-4">
-                <MetricCard title="Top 10" desc="Position in Dribbble" sub="20% increase from last week" />
-                <MetricCard title="26" desc="New Employees Onboarded" sub="15% increase from last month" color="text-orange-400" />
-                <MetricCard title="500" desc="New Clients Approached" sub="5% increase from last week" color="text-cyan-400" />
+            {/* Row 1: Mini Metrics */}
+            <div className="md:col-span-12 lg:col-span-4 flex flex-col gap-4">
+                <MetricCard
+                    title="Top 10"
+                    desc="Dribbble Position"
+                    sub="+20% this week"
+                    icon="🎯"
+                />
+                <MetricCard
+                    title="26"
+                    desc="New Onboarded"
+                    sub="+15% last month"
+                    color="text-orange-500"
+                    icon="👤"
+                />
+                <MetricCard
+                    title="500"
+                    desc="Clients Approached"
+                    sub="+5% conversion"
+                    color="text-cyan-500"
+                    icon="💼"
+                />
             </div>
 
-            {/* Bottom Row */}
-            <div className="md:col-span-6 lg:col-span-8 bg-white/80 backdrop-blur border border-gray-200 dark:border-gray-600 shadow-md rounded-2xl p-1 md:p-4 dark:bg-[#1E1E1E] p-6 rounded-3xl">
-                <div className="flex justify-between mb-1 md:mb-4">
-                    <h3 className="font-medium">Incoming Messages</h3>
-                    <div className="flex g p-1amd:p-4 text-xs">
-                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400"></div> Achieved</span>
-                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-cyan-400"></div> Target</span>
+            {/* Bottom Row: Messages Chart */}
+            <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">Incoming Messages</h3>
+                        <p className="text-sm text-slate-500">Monthly engagement analytics</p>
+                    </div>
+                    <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                        <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                            <span className="w-2 h-2 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]"></span> Achieved
+                        </span>
+                        <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"></span> Target
+                        </span>
                     </div>
                 </div>
-                <Chart options={lineChartOptions} series={lineChartSeries} type="line" height={250} />
+                <div className="w-full">
+                    <Chart options={lineChartOptions} series={lineChartSeries} type="line" height={280} />
+                </div>
             </div>
 
-            <div className="md:col-span-6 lg:col-span-4 bg-white/80 backdrop-blur border border-gray-200 dark:border-gray-600 shadow-md rounded-2xl p-1 md:p-4 dark:bg-[#1E1E1E] p-6 rounded-3xl">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-medium">Notifications</h3>
-                    <button className="text-orange-400 text-xs">View All</button>
+            {/* Bottom Row: Notifications */}
+            <div className="md:col-span-12 lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h3 className="font-semibold text-slate-800 dark:text-slate-100">Notifications</h3>
+                    <button className="px-3 py-1 text-xs font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-colors">
+                        View All
+                    </button>
                 </div>
-                <div className="space-y-4">
-                    <NotificationItem name="Ellie" action="joined team developers" time="04 April, 2021 | 04:00 PM" />
-                    <NotificationItem name="Jenny" action="joined team HR" time="03 April, 2021 | 04:00 PM" />
-                    <NotificationItem name="Adam" action="got employee of the month" time="03 April, 2021 | 02:00 PM" />
-                    <NotificationItem name="Robert" action="joined team design" time="02 April, 2021 | 02:00 PM" />
+                <div className="relative space-y-6 before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-100 dark:before:bg-slate-800">
+                    <NotificationItem name="Ellie" action="joined team developers" time="04:00 PM" />
+                    <NotificationItem name="Jenny" action="joined team HR" time="Yesterday" />
+                    <NotificationItem name="Adam" action="employee of the month" time="2 days ago" isSpecial />
+                    <NotificationItem name="Robert" action="joined team design" time="02:00 PM" />
                 </div>
             </div>
         </div>
@@ -125,7 +171,7 @@ const StatItem = ({ label, value, color }: any) => (
         <p className="text-[10px] text-gray-500 flex items-center gap-1">
             <span className={`w-1.5 h-1.5 rounded-full ${color.replace('text', 'bg')}`}></span> {label}
         </p>
-        <p className={`text-xl font-bold ${color}`}>{value}</p>
+        <p className={`text-xl font-bold`}>{value}</p>
     </div>
 );
 

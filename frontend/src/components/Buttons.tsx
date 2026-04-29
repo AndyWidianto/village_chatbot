@@ -20,3 +20,19 @@ export function ButtonPrimary({ onClick, children }: ButtonProps) {
         </button>
     )
 }
+
+export function ButtonSecondary({ onClick, children }: ButtonProps) {
+    return (
+        <button className="bg-secondary hover:bg-secondary-hover text-white font-bold py-2 px-4 rounded-md w-full" onClick={onClick}>
+            {children}
+        </button>
+    )
+}
+
+export function ButtonDanger({ onClick, children }: ButtonProps) {
+    return (
+        <button className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-600/10 text-red-500 font-bold py-2 px-4 rounded-md w-full" onClick={onClick}>
+            {children}
+        </button>
+    )
+}

@@ -10,26 +10,32 @@ import CreateAutoReply from './pages/autoreplies/CreateAutoreply'
 import ProfileSettings from './pages/Settings'
 import Notification from './pages/Notification'
 import CreateBroadcast from './pages/broadcasts/CreateBroadcast'
+import Knowledge from './pages/Knowledge/Knowledge'
+import LoginPage from './pages/Login'
+import Authorization from './Authorization'
+import CreateKnowledgePage from './pages/Knowledge/CreateKnowledge'
 
 
 export default function App() {
   return (
-    // Letakkan di sini agar seluruh aplikasi punya akses ke tema yang sama
     <ThemeProvider> 
       <BrowserRouter>
         <Routes>
-          {/* Dashboard Group */}
-          <Route path="/dashboard" element={<Layout />}>
+          <Route path="/dashboard" element={<Authorization><Layout /></Authorization>}>
             <Route index element={<Dashboard />} />
             <Route path="autoreply" element={<AutoReply />} />
             <Route path="autoreply/create" element={<CreateAutoReply />} />
             <Route path="broadcasts" element={<Broadcast />} />
             <Route path="broadcasts/create" element={<CreateBroadcast />} />
             <Route path="devices" element={<Device />} />
+            <Route path="knowledge-base" element={<Knowledge />} />
+             <Route path="knowledge-base/create" element={<CreateKnowledgePage />} />
             <Route path="tasks" element={<Dashboard />} />
             <Route path="settings" element={<ProfileSettings />} />
             <Route path="notifications" element={<Notification />} />
           </Route>
+
+          <Route path="login" element={<LoginPage />} />
 
           {/* Test Page */}
           <Route path="/test" element={<h2>Hallo</h2>} />
