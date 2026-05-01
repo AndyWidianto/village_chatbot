@@ -1,4 +1,4 @@
-import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter, Info, MessageSquare, Tag } from 'lucide-react';
+import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter, MessageSquare, Tag } from 'lucide-react';
 import useKnowledge from '../../hooks/knowledge';
 import MotionModal from '../../components/Motion';
 import FormModal from '../../components/FormModal';

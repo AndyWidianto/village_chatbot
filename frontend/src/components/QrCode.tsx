@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { RefreshCw, X, AlertCircle } from 'lucide-react';
 import useAxios from '../lib/axios.service';

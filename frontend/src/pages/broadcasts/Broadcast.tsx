@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 export default function Broadcast() {

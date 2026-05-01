@@ -3,7 +3,7 @@ import { Paperclip, CheckCheck, Send, Users, Calendar, FileSpreadsheet, Clipboar
 import { ButtonPrimary } from '../../components/Buttons';
 
 const CreateBroadcast = () => {
-  const refFileInput = useRef<HTMLInputElement | null>(null);
+//   const refFileInput = useRef<HTMLInputElement | null>(null);
   const refExcelInput = useRef<HTMLInputElement | null>(null);
   
   const [form, setForm] = useState({

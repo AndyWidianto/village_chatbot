@@ -1,5 +1,3 @@
-import React from 'react';
-import { Bell, File, MessageSquare, AtSign, UserPlus, MoreHorizontal } from 'lucide-react';
 
 const notifications = [
   {

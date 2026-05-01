@@ -168,7 +168,7 @@ export default function Layout() {
         >
           {/* Tooltip/Label yang muncul saat hover */}
           <span className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white dark:bg-slate-800 shadow-xl border dark:border-slate-700 px-4 py-2 rounded-2xl text-sm font-bold text-indigo-600 dark:text-indigo-400 pointer-events-none">
-            Tanya AI Desa
+            Tanya AI
           </span>
 
           {/* Main Button Container */}

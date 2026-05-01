@@ -189,6 +189,7 @@ export default function useKnowledge() {
 
             const res = await axiosPrivate.post("/knowledges", dataToSend);
             const data = res.data;
+            console.log(data.messge)
             toast.success("Knowledge berhasil ditambahkan");
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal membuat knowledge";

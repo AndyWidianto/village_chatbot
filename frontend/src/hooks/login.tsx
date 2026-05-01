@@ -40,10 +40,6 @@ export default function useLogin() {
             toast.success("Login successfully!", {
                 duration: 2000,
                 position: 'top-right',
-                style: {
-                    background: '#00ff44',
-                    color: '#fff',
-                }
             })
             navigate("/dashboard");
         } catch (err: any) {

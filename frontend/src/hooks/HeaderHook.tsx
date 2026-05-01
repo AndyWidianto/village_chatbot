@@ -1,5 +1,8 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { ThemeContext } from "../../ThemeProvider";
+import { ThemeContext } from "../ThemeProvider";
+import type { Notification } from "../lib/types";
+import useAxios from "../lib/axios.service";
+import { toast } from "sonner";
 
 export default function useHeaderHook() {
     const notifications = [
@@ -39,6 +42,8 @@ export default function useHeaderHook() {
             unread: false,
         }
     ];
+    const { axiosPrivate } = useAxios();
+    // const [notifications, setNotifications] = useState<Notification[]>([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
     const [isOpenProfile, setIsOpenProfile] = useState(false);
@@ -75,6 +80,27 @@ export default function useHeaderHook() {
         alert("Fokus ke input search! (Implementasi logika pencarian di sini)");
     }
 
+        // const fetchNotifications = async () => {
+        //     try {
+        //         const res = await axiosPrivate.get(`/notifications`);
+        //         const data = res.data;
+        //         setNotifications(data);
+        //     } catch (err: any) {
+        //         const errorMessage = err.response?.data?.message || "Gagal mengambil data notification";
+        //         toast.error(errorMessage, {
+        //             duration: 4000,
+        //             position: 'top-right',
+        //             style: {
+        //                 borderRadius: '12px',
+        //                 background: '#1e293b',
+        //                 color: '#fff',
+        //             },
+        //         });
+    
+        //         console.error("Fetch Error:", err);
+        //     }
+        // }
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (refNotification.current && !refNotification.current.contains(event.target as Node)) {
@@ -84,6 +110,8 @@ export default function useHeaderHook() {
                 setIsOpenProfile(false);
             }   
         };
+
+        // fetchNotifications();
 
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
