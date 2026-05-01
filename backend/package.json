@@ -45,6 +45,7 @@
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
+    "module-alias": "^2.3.4",
     "multer": "^2.1.1",
     "ollama": "^0.6.3",
     "passport-jwt": "^4.0.1",
@@ -101,5 +102,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "_moduleAliases": {
+    "@": "dist/src"
   }
 }
