@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import ollama from "ollama";
+import { Ollama } from "ollama";
 import { Content, GoogleGenerativeAI } from "@google/generative-ai";
 
 
@@ -13,6 +13,7 @@ interface HistoryChatbot {
 export class OllamaService implements OnModuleInit {
     private genAI: GoogleGenerativeAI;
     private historyChatbot: HistoryChatbot[] = [];
+    private ollama = new Ollama({ host: process.env.BASE_URL_OLLAMA || "http://127.0.0.1:11434" });
 
     constructor() { }
 
@@ -21,7 +22,7 @@ export class OllamaService implements OnModuleInit {
     }
 
     async embeddings(text: string) {
-        const response = await ollama.embeddings({
+        const response = await this.ollama.embeddings({
             model: 'bge-m3',
             prompt: text,
         });
