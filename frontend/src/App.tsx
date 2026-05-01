@@ -14,6 +14,7 @@ import Knowledge from './pages/Knowledge/Knowledge'
 import LoginPage from './pages/Login'
 import Authorization from './Authorization'
 import CreateKnowledgePage from './pages/Knowledge/CreateKnowledge'
+import Home from './pages/Home'
 
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
     <ThemeProvider> 
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Authorization><Layout /></Authorization>}>
             <Route index element={<Dashboard />} />
             <Route path="autoreply" element={<AutoReply />} />
