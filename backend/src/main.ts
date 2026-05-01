@@ -4,13 +4,15 @@ import { ValidationPipe } from '@nestjs/common';
 import CookieParser from "cookie-parser";
 
 async function bootstrap() {
+  const whitelist = [
+    'http://localhost:5173',
+    process.env.BASE_URL_CLIENT,
+    'https://private-village-chatbot.vercel.app'
+  ].filter(Boolean);
   const app = await NestFactory.create(AppModule);
   app.use(CookieParser())
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      process.env.BASE_URL_CLIENT!
-    ],
+    origin: whitelist,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
