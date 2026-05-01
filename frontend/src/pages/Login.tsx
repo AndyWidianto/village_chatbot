@@ -1,4 +1,4 @@
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Box } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import useLogin from '../hooks/login';
 import Loading from '../components/Loading';
 

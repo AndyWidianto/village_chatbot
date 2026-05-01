@@ -1,8 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { ThemeContext } from "../ThemeProvider";
-import type { Notification } from "../lib/types";
-import useAxios from "../lib/axios.service";
-import { toast } from "sonner";
+// import useAxios from "../lib/axios.service";
 
 export default function useHeaderHook() {
     const notifications = [
@@ -42,7 +40,7 @@ export default function useHeaderHook() {
             unread: false,
         }
     ];
-    const { axiosPrivate } = useAxios();
+    // const { axiosPrivate } = useAxios();
     // const [notifications, setNotifications] = useState<Notification[]>([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
