@@ -1,9 +1,9 @@
-import { CreateKnowledgeDto, UpdateKnowledgeDto } from "@/lib/dto/knowledge";
+import { CreateKnowledgeDto, UpdateKnowledgeDto } from "../../lib/dto/knowledge";
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { KnowledgeService } from "./knowledge.service";
-import type { RequestAndPayload } from "@/lib/types";
+import type { RequestAndPayload } from "../../lib/types";
 
 
 @Controller("api/knowledges")

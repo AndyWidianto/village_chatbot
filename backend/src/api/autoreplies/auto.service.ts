@@ -1,6 +1,6 @@
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { TypeNotification } from "@/lib/shared/notification";
-import { CreateAutoreplies, PayloadJWT, UpdateAutoreplies } from "@/lib/types";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { TypeNotification } from "../../lib/shared/notification";
+import { CreateAutoreplies, PayloadJWT, UpdateAutoreplies } from "../../lib/types";
 import { Injectable, NotFoundException } from "@nestjs/common";
 
 

@@ -1,7 +1,7 @@
-import { RegisterDto } from "@/lib/dto/auth.dto";
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { TokenService } from "@/lib/token/token.service";
-import { Login } from "@/lib/types";
+import { RegisterDto } from "../../lib/dto/auth.dto";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { TokenService } from "../../lib/token/token.service";
+import { Login } from "../../lib/types";
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import bcrypt from "bcryptjs";
 

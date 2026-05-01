@@ -1,5 +1,5 @@
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { PayloadUser } from "@/lib/types";
+import { PrismaService } from "../lib/prisma/prisma.service";
+import { PayloadUser } from "../lib/types";
 import { JwtService } from "@nestjs/jwt";
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";

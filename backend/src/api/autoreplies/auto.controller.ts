@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { AutoreplyService } from "./auto.service";
-import { CreateAutoreplyDto, UpdateAutoreplyDto } from "@/lib/dto/autoreply.dto";
+import { CreateAutoreplyDto, UpdateAutoreplyDto } from "../../lib/dto/autoreply.dto";
 import { AuthGuard } from "@nestjs/passport";
-import type { RequestAndPayload } from "@/lib/types";
+import type { RequestAndPayload } from "../../lib/types";
 
 
 

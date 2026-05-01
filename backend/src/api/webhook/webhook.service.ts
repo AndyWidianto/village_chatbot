@@ -1,10 +1,10 @@
-import { EvolutionService } from "@/lib/evolutions/evolutions.service";
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { EvolutionWebhookPayload } from "@/lib/types";
+import { EvolutionService } from "../../lib/evolutions/evolutions.service";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { EvolutionWebhookPayload } from "../../lib/types";
 import { Injectable } from "@nestjs/common";
 import { ChatbotService } from "../chatbot/chatbot.service";
 import { MessageService } from "../message/message.service";
-import { StatusMessage } from "@/lib/shared/message";
+import { StatusMessage } from "../../lib/shared/message";
 
 
 

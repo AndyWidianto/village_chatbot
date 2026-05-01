@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginDto, RegisterDto } from "@/lib/dto/auth.dto";
+import { LoginDto, RegisterDto } from "../../lib/dto/auth.dto";
 import type { Response } from "express";
-import type { RequestAndPayload } from "@/lib/types";
+import type { RequestAndPayload } from "../../lib/types";
 import { AuthGuard } from "@nestjs/passport";
 
 

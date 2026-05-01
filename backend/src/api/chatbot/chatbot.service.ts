@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { OllamaService } from "@/lib/ollama/ollama.service";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { OllamaService } from "../../lib/ollama/ollama.service";
 
 
 

@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { DeviceService } from './device.service';
-import { CreateDeviceDto } from '@/lib/dto/device.dto';
+import { CreateDeviceDto } from '../../lib/dto/device.dto';
 import { AuthGuard } from '@nestjs/passport';
-import type { RequestAndPayload } from '@/lib/types';
+import type { RequestAndPayload } from '../../lib/types';
 
 
 @Controller('api/devices')

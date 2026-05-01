@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { MessageService } from "./message.service";
 import { AuthGuard } from "@nestjs/passport";
-import { CreateMessageDto } from "@/lib/dto/message.dto";
+import { CreateMessageDto } from "../../lib/dto/message.dto";
 
 
 @Controller("api/messages")

@@ -1,6 +1,6 @@
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { supabaseClient } from "@/lib/supabase";
-import { CreateUser, PayloadJWT, PayloadUser, ResetPassword } from "@/lib/types";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { supabaseClient } from "../../lib/supabase";
+import { CreateUser, PayloadJWT, PayloadUser, ResetPassword } from "../../lib/types";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import bcrypt from "bcryptjs";
 

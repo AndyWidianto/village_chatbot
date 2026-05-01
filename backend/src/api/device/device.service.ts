@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../lib/prisma/prisma.service';
-import { EvolutionService } from '@/lib/evolutions/evolutions.service';
-import { CreateDevice, PayloadJWT } from '@/lib/types';
-import { TypeNotification } from '@/lib/shared/notification';
+import { EvolutionService } from '../../lib/evolutions/evolutions.service';
+import { CreateDevice, PayloadJWT } from '../../lib/types';
+import { TypeNotification } from '../../lib/shared/notification';
 
 
 @Injectable()

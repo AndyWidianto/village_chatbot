@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { NotificationService } from "./notification.service";
 import { NotificationController } from "./notification.controller";
-import { AccessTokenStrategy } from "@/lib/guards/access.strategy";
+import { AccessTokenStrategy } from "../../lib/guards/access.strategy";
 
 
 @Module({

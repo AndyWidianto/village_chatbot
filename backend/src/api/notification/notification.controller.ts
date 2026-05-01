@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Req, UseGuards } from "@nestjs/common";
 import { NotificationService } from "./notification.service";
 import { AuthGuard } from "@nestjs/passport";
-import type { RequestAndPayload } from "@/lib/types";
+import type { RequestAndPayload } from "../../lib/types";
 
 
 

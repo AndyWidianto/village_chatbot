@@ -1,10 +1,10 @@
-import { PrismaService } from "@/lib/prisma/prisma.service";
+import { PrismaService } from "../../lib/prisma/prisma.service";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateKnowledgeAI, PayloadJWT } from "@/lib/types";
+import { CreateKnowledgeAI, PayloadJWT } from "../../lib/types";
 import * as XLSX from 'xlsx';
 import { Prisma } from "@prisma/client";
-import { OllamaService } from "@/lib/ollama/ollama.service";
-import { TypeNotification } from "@/lib/shared/notification";
+import { OllamaService } from "../../lib/ollama/ollama.service";
+import { TypeNotification } from "../../lib/shared/notification";
 
 const pdf = require('pdf-parse-fork');
 

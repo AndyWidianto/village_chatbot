@@ -1,8 +1,8 @@
-import { ResetPasswordDto, UpdateUserDto } from "@/lib/dto/user.dto";
+import { ResetPasswordDto, UpdateUserDto } from "../../lib/dto/user.dto";
 import { Body, Controller, Delete, Get, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { AuthGuard } from "@nestjs/passport";
-import type { RequestAndPayload } from "@/lib/types";
+import type { RequestAndPayload } from "../../lib/types";
 import { FileInterceptor } from "@nestjs/platform-express";
 
 

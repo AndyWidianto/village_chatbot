@@ -1,6 +1,6 @@
-import { EventGateway } from "@/event/event.gateway";
-import { PrismaService } from "@/lib/prisma/prisma.service";
-import { CreateMessage } from "@/lib/types";
+import { EventGateway } from "../../event/event.gateway";
+import { PrismaService } from "../../lib/prisma/prisma.service";
+import { CreateMessage } from "../../lib/types";
 import { Injectable } from "@nestjs/common";
 
 
