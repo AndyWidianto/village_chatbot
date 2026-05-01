@@ -53,7 +53,7 @@ export async function userSeeders() {
       email: 'review@example.com',
       password: "preview1234",
       role: UserRole.review,
-      username: "test1234",
+      username: "reviewer",
       updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     },
     {
@@ -61,7 +61,7 @@ export async function userSeeders() {
       email: 'andywidianto56@gmail.com',
       password: "developer1234&",
       role: UserRole.review,
-      username: "test1234",
+      username: "andywidianto",
       updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     },
   ];
