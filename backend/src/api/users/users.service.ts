@@ -1,5 +1,6 @@
 import { PrismaService } from "@/lib/prisma/prisma.service";
-import { CreateUser, PayloadUser, ResetPassword } from "@/lib/types";
+import { supabaseClient } from "@/lib/supabase";
+import { CreateUser, PayloadJWT, PayloadUser, ResetPassword } from "@/lib/types";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import bcrypt from "bcryptjs";
 
@@ -31,10 +32,11 @@ export class UsersService {
             data: { ...dataToSend },
             select: {
                 id: true,
-                username: true,
                 email: true,
-                role: true,
-                name: true
+                username: true,
+                name: true,
+                profileUrl: true,
+                role: true
             }
         })
     }
@@ -61,7 +63,7 @@ export class UsersService {
             this.prisma.user.count({
                 where: {
                     updatedAt: {
-                        gte: twentyFourHoursAgo, 
+                        gte: twentyFourHoursAgo,
                     },
                 },
             }),
@@ -73,5 +75,49 @@ export class UsersService {
             inactive: total - active,
             total,
         };
+    }
+
+    async uploadProfile(user: PayloadJWT, file: Express.Multer.File) {
+        const existing = await this.findOne(user.id);
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const supabase = supabaseClient();
+        const { data, error } = await supabase.storage
+            .from('profile_images')
+            .upload(fileName, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true
+            });
+
+        if (error) throw new Error('Upload failed: ' + error.message);
+        const { data: { publicUrl } } = supabase.storage
+            .from('profile')
+            .getPublicUrl(fileName);
+
+        if (existing.thumbnail) {
+            const {data, error} = await supabase.storage
+                .from('profile_images')
+                .remove([existing.thumbnail])
+            if (error) {
+                throw new BadRequestException("Bad request");
+            }
+        }
+
+
+        const updateUser = await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                profileUrl: publicUrl,
+                thumbnail: fileName
+            },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                name: true,
+                profileUrl: true,
+                role: true
+            }
+        });
+        return updateUser;
     }
 }

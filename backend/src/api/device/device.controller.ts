@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { CreateDeviceDto } from '@/lib/dto/device.dto';
 import { AuthGuard } from '@nestjs/passport';
+import type { RequestAndPayload } from '@/lib/types';
 
 
 @Controller('api/devices')
@@ -10,8 +11,9 @@ export class DeviceController {
 
     @Post()
     @UseGuards(AuthGuard("jwt"))
-    async create(@Body() createDeviceDto: CreateDeviceDto) {
-        return this.deviceService.create(createDeviceDto);
+    async create(@Req() req: RequestAndPayload, @Body() createDeviceDto: CreateDeviceDto) {
+        const user = req.user;
+        return this.deviceService.create(user, createDeviceDto);
     }
 
     @Get()
@@ -28,7 +30,8 @@ export class DeviceController {
 
     @Delete(":id")
     @UseGuards(AuthGuard("jwt"))
-    async deleteDevice(@Param("id") id: string) {
-        return this.deviceService.delete(id);
+    async deleteDevice(@Req() req: RequestAndPayload ,@Param("id") id: string) {
+        const user = req.user;
+        return this.deviceService.delete(user, id);
     }
 }

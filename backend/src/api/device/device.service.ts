@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../lib/prisma/prisma.service';
 import { EvolutionService } from '@/lib/evolutions/evolutions.service';
-import { CreateDevice } from '@/lib/types';
+import { CreateDevice, PayloadJWT } from '@/lib/types';
+import { TypeNotification } from '@/lib/shared/notification';
 
 
 @Injectable()
@@ -11,12 +12,21 @@ export class DeviceService {
     private evolution: EvolutionService
   ) { }
 
-  async create({ name, instanceName }: CreateDevice) {
+  async create(user: PayloadJWT, { name, instanceName }: CreateDevice) {
     const instance = await this.evolution.createInstance({ instanceName });
     const newDevice = await this.prisma.device.create({
       data: { id: instance.instance.instanceId, name, instanceName }
     });
     await this.setWebhook(instanceName, `api/webhook/${newDevice.id}`);
+    await this.prisma.notification.create({
+      data: {
+        title: `delete autoreply`,
+        content: JSON.stringify(instance),
+        type: TypeNotification.success,
+        isRead: false,
+        userId: user.id
+      }
+    });
     return {
       ...newDevice,
       status: instance?.connectionStatus ?? 'disconnected',
@@ -65,12 +75,21 @@ export class DeviceService {
     return existing;
   }
 
-  async delete(id: string) {
+  async delete(user: PayloadJWT,id: string) {
     const device = await this.getOne(id);
     await this.evolution.instanceDelete(device.instanceName);
     await this.prisma.device.delete({
       where: { id: device.id }
     })
+    await this.prisma.notification.create({
+      data: {
+        title: `delete autoreply`,
+        content: JSON.stringify(device),
+        type: TypeNotification.success,
+        isRead: false,
+        userId: user.id
+      }
+    });
     return { message: "Delete device successfully" };
   }
 }

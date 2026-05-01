@@ -17,7 +17,7 @@ export class AuthController {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,  
             secure: false, 
-            sameSite: 'none', // strict
+            sameSite: 'strict', // strict
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         return { accessToken, user };

@@ -7,6 +7,7 @@ import { KnowledgeModule } from "./knowledge/knowledge.module";
 import { UsersModule } from "./users/users.module";
 import { WebhookModule } from "./webhook/webhook.module";
 import { MessageModule } from "./message/message.module";
+import { NotificationModule } from "./notification/notification.module";
 
 
 @Module({
@@ -18,7 +19,8 @@ import { MessageModule } from "./message/message.module";
         KnowledgeModule,
         UsersModule,
         WebhookModule,
-        MessageModule
+        MessageModule,
+        NotificationModule
     ]
 })
 export class ApiModule {}

@@ -21,10 +21,11 @@ export class AutoreplyService {
         });
         await this.prisma.notification.create({
             data: {
-                title: `${user.name} CREATE AUTOREPLY`,
-                content: data.name,
+                title: 'create autoreply',
+                content: JSON.stringify(data),
                 type: TypeNotification.success,
-                isRead: false
+                isRead: false,
+                userId: user.id
             }
         })
         return newAuto;
@@ -41,16 +42,13 @@ export class AutoreplyService {
             where: { id },
             data: { ...data }
         })
-        const updateDetails = Object.entries(data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(' | ');
-
         await this.prisma.notification.create({
             data: {
-                title: `${user.name} UPDATE AUTOREPLY`,
-                content: updateDetails || 'No changes detected',
+                title: `update autoreply`,
+                content: JSON.stringify(updateAutoreply),
                 type: TypeNotification.success,
-                isRead: false
+                isRead: false,
+                userId: user.id
             }
         });
 
@@ -127,10 +125,11 @@ export class AutoreplyService {
 
         await this.prisma.notification.create({
             data: {
-                title: `${user.name} DELETE AUTOREPLY`,
-                content: `Delete autoreply ${existing.name}`,
+                title: `delete autoreply`,
+                content: JSON.stringify(existing),
                 type: TypeNotification.success,
-                isRead: false
+                isRead: false,
+                userId: user.id
             }
         });
         return { message: "Delete Autoreply successfully" };

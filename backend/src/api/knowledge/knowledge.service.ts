@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import { OllamaService } from "@/lib/ollama/ollama.service";
 import { TypeNotification } from "@/lib/shared/notification";
 
-const pdf = require("pdf-parse");
+const pdf = require('pdf-parse-fork');
 
 
 
@@ -87,13 +87,18 @@ export class KnowledgeService {
             VALUES ${Prisma.join(values)}
         `;
 
+        const dataContent = {
+            name: data.name
+        }
+
 
         await this.prisma.notification.create({
             data: {
-                title: `${user.name} CREATE KNOWLEDGE AI`,
-                content: data.name,
+                title: `create knowledge ai`,
+                content: JSON.stringify(dataContent),
                 type: TypeNotification.success,
-                isRead: false
+                isRead: false,
+                userId: user.id
             }
         });
 
@@ -188,6 +193,15 @@ export class KnowledgeService {
                 isRead: false
             }
         });
+        await this.prisma.notification.create({
+            data: {
+                title: `delete knowledge ai`,
+                content: JSON.stringify(exisitng),
+                type: TypeNotification.success,
+                isRead: false,
+                userId: user.id
+            }
+        });
         return { message: "Delete knowledge successfully" };
     }
 
@@ -197,16 +211,13 @@ export class KnowledgeService {
             where: { id: existing.id },
             data: data
         });
-        const updateDetails = Object.entries(data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(' | ');
-
         await this.prisma.notification.create({
             data: {
-                title: `${user.name} UPDATE KNOWLEDGE AI`,
-                content: updateDetails,
+                title: `update knowledge ai`,
+                content: JSON.stringify(existing),
                 type: TypeNotification.success,
-                isRead: false
+                isRead: false,
+                userId: user.id
             }
         });
         return updateKnowledge;

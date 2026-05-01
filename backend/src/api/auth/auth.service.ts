@@ -35,7 +35,8 @@ export class AuthService {
             name: user.name,
             email: user.email,
             role: user.role,
-            username: user.username
+            username: user.username,
+            profileUrl: user.profileUrl
         } };
     }
     async Register(dto: RegisterDto) {

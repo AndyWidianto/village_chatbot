@@ -1,8 +1,9 @@
 import { ResetPasswordDto, UpdateUserDto } from "@/lib/dto/user.dto";
-import { Body, Controller, Delete, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { AuthGuard } from "@nestjs/passport";
 import type { RequestAndPayload } from "@/lib/types";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 
 
@@ -35,5 +36,13 @@ export class UsersController {
     @UseGuards(AuthGuard("jwt"))
     async getStats() {
         return this.service.getStats();
+    }
+    
+    @Post("upload")
+    @UseGuards(AuthGuard("jwt"))
+    @UseInterceptors(FileInterceptor("file"))
+    async uploadProfile(@Req() req: RequestAndPayload, @UploadedFile("file") file: Express.Multer.File) {
+        const user = req.user;
+        return this.service.uploadProfile(user, file);
     }
 }

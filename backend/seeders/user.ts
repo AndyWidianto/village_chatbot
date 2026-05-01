@@ -11,7 +11,7 @@ export async function userSeeders() {
     {
       name: 'Andy Widianto',
       email: 'andy@evolve.id',
-      password: "password1234",
+      password: "andy1234567&",
       role: UserRole.admin,
       username: "andy124",
       updatedAt: new Date(), 
@@ -19,7 +19,7 @@ export async function userSeeders() {
     {
       name: 'Budi Santoso',
       email: 'budi@desa.go.id',
-      password: "password1234",
+      password: "budy12345678$",
       role: UserRole.admin,
       username: "budy1234",
       updatedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), // Inaktif (2 hari lalu)
@@ -35,7 +35,7 @@ export async function userSeeders() {
     {
       name: 'Admin Desa',
       email: 'admin@desa.go.id',
-      password: "password1234",
+      password: "admin09876545&",
       role: UserRole.admin,
       username: "admin1234",
       updatedAt: new Date(),
@@ -43,8 +43,24 @@ export async function userSeeders() {
     {
       name: 'User Testing',
       email: 'test@example.com',
-      password: "password1234",
+      password: "testing1239654&",
       role: UserRole.admin,
+      username: "test1234",
+      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      name: 'Review',
+      email: 'review@example.com',
+      password: "preview1234",
+      role: UserRole.review,
+      username: "test1234",
+      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      name: 'andy',
+      email: 'andywidianto56@gmail.com',
+      password: "developer1234&",
+      role: UserRole.review,
       username: "test1234",
       updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     },
