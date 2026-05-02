@@ -58,7 +58,7 @@ export class KnowledgeService {
         if (rawText && rawText.trim()) {
             chunks = this.splitText(rawText, chunkSize, chunkOverlap);
         }
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms * 1000 * 60));
         const chunkData: { content: string; vector: string }[] = [];
         const batchSize = 100; // Sesuai limit Gemini Free Tier
 
@@ -79,7 +79,7 @@ export class KnowledgeService {
             chunkData.push(...results);
             if (i + batchSize < chunks.length) {
                 console.log("Limit batch tercapai. Menunggu 60 detik agar tidak 429...");
-                await delay(63000);
+                await delay(3);
             }
         }
 
