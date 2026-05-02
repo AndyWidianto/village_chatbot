@@ -60,7 +60,7 @@ export class KnowledgeService {
         }
 
         const chunkData = await Promise.all(chunks.map(async (chunk) => {
-            const vector = await this.ollama.embeddings(chunk);
+            const vector = await this.ollama.embeddingsGemini(chunk);
             return {
                 content: chunk,
                 vector: `[${vector.join(',')}]`
