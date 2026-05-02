@@ -3,6 +3,7 @@ import useAutoreply from '../../hooks/autoreply';
 import MotionModal from '../../components/Motion';
 import FormModal from '../../components/FormModal';
 import { Input, InputCheckbox, Select, Textarea } from '../../components/Inputs';
+import { TdActionSkeleton, TdContentSkeleton, TdNameSkeleton, TdNoSkeleton, TdStatusSkeleton, TdTypeSkeleton, TrSkeleton } from '../../components/Skeletons';
 
 export default function AutoReply() {
   const {
@@ -30,16 +31,16 @@ export default function AutoReply() {
       <MotionModal onClose={handleClose} isOpen={isOpen}>
         <FormModal title='Update Autoreply' onClose={handleClose} onSave={updateAutoreply} loading={loading}>
           <div className="grid grid-cols-2 gap-4">
-            <Input icon={Tag} onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))} title='Keyword' value={selected?.name || ""} />
-            <Select title='Type' onChange={(e) => setFormData(prev => ({...prev, type: e.target.value}))} value={selected?.type || "keyword"}>
+            <Input icon={Tag} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} title='Keyword' value={selected?.name || ""} />
+            <Select title='Type' onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))} value={selected?.type || "keyword"}>
               <option value="">Select type</option>
               <option value="keyword">Keyword</option>
               <option value="ai_rag">AI RAG</option>
             </Select>
           </div>
-          {formData.type === "keyword" ? <Textarea icon={MessageSquare} title='Response Content' onChange={(e) => setFormData(prev => ({...prev, replyContent: e.target.value}))} value={selected?.replyContent || ""} /> :
-          <Textarea icon={MessageSquare} title='Prompt AI' onChange={(e) => setFormData(prev => ({...prev, aiPrompt: e.target.value}))} value={selected?.aiPrompt || ""} />}
-          <InputCheckbox title='Status' icon={ToggleLeft} isActive={selected?.isActive || false}/>
+          {formData.type === "keyword" ? <Textarea icon={MessageSquare} title='Response Content' onChange={(e) => setFormData(prev => ({ ...prev, replyContent: e.target.value }))} value={selected?.replyContent || ""} /> :
+            <Textarea icon={MessageSquare} title='Prompt AI' onChange={(e) => setFormData(prev => ({ ...prev, aiPrompt: e.target.value }))} value={selected?.aiPrompt || ""} />}
+          <InputCheckbox title='Status' icon={ToggleLeft} isActive={selected?.isActive || false} />
         </FormModal>
       </MotionModal>
       <div className="w-full mx-1 md:mx-auto space-y-4">
@@ -77,64 +78,76 @@ export default function AutoReply() {
               </thead>
 
               <tbody className="divide-y divide-gray-400 dark:divide-gray-800">
-                {autoreplies.length > 0 ? (
-                  autoreplies.map((autoreply, idx) => (
-                    <tr key={autoreply.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
-                      <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{idx + 1}</td>
-                      <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{autoreply.name}</td>
-                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type}</td>
-                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{ autoreply.type === "keyword" ? autoreply.replyContent : autoreply.aiPrompt}</td>
-                      <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">
-                        {autoreply.isActive ? (
-                          <span className="px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-bold">Active</span>
-                        ) : (
-                          <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded-full text-xs font-bold">Inactive</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-center">
-                        <div className="flex justify-center gap-3">
-                          <div className="relative group">
-                            <button
-                              onClick={() => handleDelete(autoreply.id)}
-                              className="p-1.5 bg-green-600/10 text-green-400 rounded-md hover:bg-green-500 hover:text-white transition"
-                            >
-                              <Info size={16} />
-                            </button>
-                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              View Details
-                            </div>
-                          </div>
-                          <div className="relative group">
-                            <button
-                              onClick={() => handleUpdate(autoreply)}
-                              className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              Update
-                            </div>
-                          </div>
-                          <div className="relative group">
-                            <button
-                              onClick={() => handleDelete(autoreply.id)}
-                              className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              Delete
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                {loading ?
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <TrSkeleton key={i}>
+                      <TdNoSkeleton />
+                      <TdNameSkeleton />
+                      <TdTypeSkeleton />
+                      <TdContentSkeleton />
+                      <TdStatusSkeleton />
+                      <TdActionSkeleton />
+                    </TrSkeleton>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500">No data found</td>
-                  </tr>
-                )}
+                  :
+                  autoreplies.length > 0 ? (
+                    autoreplies.map((autoreply, idx) => (
+                      <tr key={autoreply.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
+                        <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{idx + 1}</td>
+                        <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{autoreply.name}</td>
+                        <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type}</td>
+                        <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type === "keyword" ? autoreply.replyContent : autoreply.aiPrompt}</td>
+                        <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">
+                          {autoreply.isActive ? (
+                            <span className="px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-bold">Active</span>
+                          ) : (
+                            <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded-full text-xs font-bold">Inactive</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-center">
+                          <div className="flex justify-center gap-3">
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleDelete(autoreply.id)}
+                                className="p-1.5 bg-green-600/10 text-green-400 rounded-md hover:bg-green-500 hover:text-white transition"
+                              >
+                                <Info size={16} />
+                              </button>
+                              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                View Details
+                              </div>
+                            </div>
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleUpdate(autoreply)}
+                                className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Update
+                              </div>
+                            </div>
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleDelete(autoreply.id)}
+                                className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Delete
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-gray-500">No data found</td>
+                    </tr>
+                  )}
               </tbody>
             </table>
           </div>

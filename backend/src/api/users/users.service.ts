@@ -90,7 +90,7 @@ export class UsersService {
 
         if (error) throw new Error('Upload failed: ' + error.message);
         const { data: { publicUrl } } = supabase.storage
-            .from('profile')
+            .from('profile_images')
             .getPublicUrl(fileName);
 
         if (existing.thumbnail) {

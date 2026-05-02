@@ -6,3 +6,25 @@ export type * from "./message";
 export type * from "./notification";
 
 
+
+export interface StatDashboard {
+    autoreply: {
+        growth: number;
+        total: number;
+    }
+    knowledge: {
+        growth: number;
+        total: number;
+    }
+}
+
+export interface StatUser {
+    active: number;
+    inactive: number;
+    total: number;
+}
+
+export interface StatMessage {
+    data: number[];
+    labels: string[];
+}

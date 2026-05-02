@@ -31,6 +31,19 @@ export class OllamaService implements OnModuleInit {
         return embedding;
     }
 
+    async embeddingsGemini(text: string) {
+        const model = this.genAI.getGenerativeModel({ model: "gemini-embedding-2" });
+        const result = await model.embedContent({
+            content: {
+                parts: [{ text: text }]
+            },
+            outputDimensionality: 1024,
+        } as any);
+
+        const embedding = result.embedding;
+        return embedding.values;
+    }
+
     async chatbot(id: string, prompt: string, systemRules: string) {
         // const response = await ollama.chat({
         //     model: 'gemma3:1b',
@@ -81,41 +94,41 @@ export class OllamaService implements OnModuleInit {
         }
     }
 
-async reWrite(id: string, message: string): Promise<string> {
-    const model = this.genAI.getGenerativeModel({ model: "gemma-3n-e2b-it" });
-    const history = this.historyChatbot.find(h => h.id === id);
+    async reWrite(id: string, message: string): Promise<string> {
+        const model = this.genAI.getGenerativeModel({ model: "gemma-3n-e2b-it" });
+        const history = this.historyChatbot.find(h => h.id === id);
 
-    try {
-        const chat = model.startChat({
-            history: [
-                {
-                    role: "user",
-                    parts: [{
-                        text: `Tugas kamu adalah mengekstrak inti sari dan kata kunci dari pesan warga desa untuk pencarian dokumen (RAG). 
+        try {
+            const chat = model.startChat({
+                history: [
+                    {
+                        role: "user",
+                        parts: [{
+                            text: `Tugas kamu adalah mengekstrak inti sari dan kata kunci dari pesan warga desa untuk pencarian dokumen (RAG). 
                         Hilangkan kata-kata basa-basi, singkatan tidak baku, dan emosi. 
                         Ubah menjadi kalimat tanya atau pernyataan yang padat informasi dan mengandung kata kunci administratif yang relevan.`
-                    }],
-                },
-                {
-                    role: "model",
-                    parts: [{
-                        text: "Saya mengerti. Saya akan mengekstrak kata kunci dan informasi administratif penting dari pesan warga untuk pencarian dokumen."
-                    }],
-                },
-                ...(history?.chat || [])
-            ],
-        });
-        const result = await chat.sendMessage(`Ekstrak kata kunci pencarian dari pesan ini: "${message}"`);
-        const response = await result.response;
-        const optimizedQuery = response.text().trim();
-        
-        console.log(`Original: ${message} | Optimized for Embedding: ${optimizedQuery}`);
-        
-        return optimizedQuery || message;
+                        }],
+                    },
+                    {
+                        role: "model",
+                        parts: [{
+                            text: "Saya mengerti. Saya akan mengekstrak kata kunci dan informasi administratif penting dari pesan warga untuk pencarian dokumen."
+                        }],
+                    },
+                    ...(history?.chat || [])
+                ],
+            });
+            const result = await chat.sendMessage(`Ekstrak kata kunci pencarian dari pesan ini: "${message}"`);
+            const response = await result.response;
+            const optimizedQuery = response.text().trim();
 
-    } catch (error) {
-        console.error("Gagal melakukan ReWrite untuk Embedding:", error);
-        return message;
+            console.log(`Original: ${message} | Optimized for Embedding: ${optimizedQuery}`);
+
+            return optimizedQuery || message;
+
+        } catch (error) {
+            console.error("Gagal melakukan ReWrite untuk Embedding:", error);
+            return message;
+        }
     }
-}
 }

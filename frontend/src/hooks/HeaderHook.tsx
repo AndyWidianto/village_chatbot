@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { ThemeContext } from "../ThemeProvider";
+import { useAuthStore } from "../lib/store/authStore";
 // import useAxios from "../lib/axios.service";
 
 export default function useHeaderHook() {
@@ -42,6 +43,7 @@ export default function useHeaderHook() {
     ];
     // const { axiosPrivate } = useAxios();
     // const [notifications, setNotifications] = useState<Notification[]>([]);
+    const { user } = useAuthStore();
     const [showNotifications, setShowNotifications] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
     const [isOpenProfile, setIsOpenProfile] = useState(false);
@@ -131,5 +133,6 @@ export default function useHeaderHook() {
         refProfile,
         getGreeting,
         handleSearch,
+        user
     }
 }

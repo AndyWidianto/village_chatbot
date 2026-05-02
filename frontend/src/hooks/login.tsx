@@ -43,7 +43,7 @@ export default function useLogin() {
             })
             navigate("/dashboard");
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Gagal mengambil data autoreply";
+            const errorMessage = err.response?.data?.message || "Internal server error";
             toast.error(errorMessage, {
                 duration: 4000,
                 position: 'top-right',

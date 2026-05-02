@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import useAxios from "../lib/axios.service";
 import { toast } from "sonner";
-import type { Knowledge } from "../lib/types";
+import type { CreateKnowledge, Knowledge } from "../lib/types";
 
-interface CreateKnowledge {
-    name: string;
-    content?: string;
-    file?: File | null;
-}
 export default function useKnowledge() {
     const { axiosPrivate } = useAxios();
     const [formData, setFormData] = useState<CreateKnowledge>({
@@ -23,6 +18,7 @@ export default function useKnowledge() {
     const [selected, setSelected] = useState<Knowledge | null>(null);
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [loadingUpdate, setLoadingUpdate] = useState(false);
     const itemsPerPage = 5;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -82,6 +78,8 @@ export default function useKnowledge() {
             setOldLastId([""]);
         }
 
+        setLoading(true);
+
         try {
             const res = await axiosPrivate.get(`/knowledges?limit=${20}${query}`);
             const data = res.data;
@@ -102,11 +100,13 @@ export default function useKnowledge() {
             });
 
             console.error("Fetch Error:", err);
+        } finally {
+            setLoading(false)
         }
     }
     const updateKnowledge = async () => {
         if (!selected?.id) return;
-        setLoading(true);
+        setLoadingUpdate(true);
 
         try {
             const dataToSend: Partial<Knowledge> = {};
@@ -150,7 +150,7 @@ export default function useKnowledge() {
 
             console.error("Update Error:", err);
         } finally {
-            setLoading(false);
+            setLoadingUpdate(false);
         }
     };
 
@@ -173,41 +173,6 @@ export default function useKnowledge() {
         setCurrentPage(currentPage - 1);
         console.log(oldLastId)
     };
-
-    const handleSubmit = async (e: React.SubmitEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const dataToSend = new FormData();
-            dataToSend.append("name", formData.name);
-            if (formData.content) {
-                dataToSend.append("content", formData.content);
-            }
-            if (formData.file) {
-                dataToSend.append("file", formData.file);
-            }
-
-            const res = await axiosPrivate.post("/knowledges", dataToSend);
-            const data = res.data;
-            console.log(data.messge)
-            toast.success("Knowledge berhasil ditambahkan");
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Gagal membuat knowledge";
-            toast.error(errorMessage, {
-                duration: 4000,
-                position: 'top-right',
-                style: {
-                    borderRadius: '12px',
-                    background: '#1e293b',
-                    color: '#fff',
-                },
-            });
-
-            console.error("Fetch Error:", err);
-        } finally {
-            setLoading(false);
-        }
-    }
 
 
 
@@ -234,9 +199,9 @@ export default function useKnowledge() {
         setFormData,
         formData,
         loading,
-        handleSubmit,
         handleCurrent,
-        handlePrev
+        handlePrev,
+        loadingUpdate
     }
 
 }

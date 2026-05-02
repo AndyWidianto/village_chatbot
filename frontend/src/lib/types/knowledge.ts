@@ -6,3 +6,10 @@ export interface Knowledge {
     createdAt: Date;
     updatedAt: Date;
 }
+
+
+export interface CreateKnowledge {
+    name: string;
+    content?: string;
+    file?: File | null;
+}

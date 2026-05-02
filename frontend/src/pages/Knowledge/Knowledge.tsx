@@ -3,6 +3,7 @@ import useKnowledge from '../../hooks/knowledge';
 import MotionModal from '../../components/Motion';
 import FormModal from '../../components/FormModal';
 import { Input, Textarea } from '../../components/Inputs';
+import { TdActionSkeleton, TdContentSkeleton, TdNoSkeleton, TrSkeleton } from '../../components/Skeletons';
 
 export default function Knowledge() {
   const {
@@ -21,13 +22,14 @@ export default function Knowledge() {
     setFormData,
     loading,
     selected,
+    loadingUpdate,
     updateKnowledge
   } = useKnowledge();
 
   return (
     <div className="md:p-8 min-h-screen dark:bg-background dark:text-white">
       <MotionModal onClose={handleClose} isOpen={isOpen}>
-        <FormModal title='Update Autoreply' onClose={handleClose} onSave={updateKnowledge} loading={loading}>
+        <FormModal title='Update Autoreply' onClose={handleClose} onSave={updateKnowledge} loading={loadingUpdate}>
           <Input icon={Tag} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} title='Keyword' value={selected?.name || ""} />
           <Textarea icon={MessageSquare} rows={8} title='Prompt AI' onChange={(e) => setFormData(prev => ({ ...prev, aiPrompt: e.target.value }))} value={selected?.content || ""} />
         </FormModal>
@@ -64,44 +66,53 @@ export default function Knowledge() {
               </thead>
 
               <tbody className="divide-y divide-gray-400 dark:divide-gray-800">
-                {knowledges.length > 0 ? (
-                  knowledges.map((knowledge) => (
-                    <tr key={knowledge.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">{knowledge.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">{knowledge.content}</td>
-                      <td className="px-6 py-4 text-sm text-center">
-                        <div className="flex justify-center gap-3">
-                          <div className="relative group">
-                            <button
-                              onClick={() => handleUpdate(knowledge)}
-                              className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              Update
-                            </div>
-                          </div>
-                          <div className="relative group">
-                            <button
-                              onClick={() => handleDelete(knowledge.id)}
-                              className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              Delete
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                {loading ?
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <TrSkeleton key={i}>
+                      <TdNoSkeleton />
+                      <TdContentSkeleton />
+                      <TdActionSkeleton />
+                    </TrSkeleton>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500">No data found</td>
-                  </tr>
-                )}
+                  :
+                  knowledges.length > 0 ? (
+                    knowledges.map((knowledge) => (
+                      <tr key={knowledge.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">{knowledge.name}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">{knowledge.content}</td>
+                        <td className="px-6 py-4 text-sm text-center">
+                          <div className="flex justify-center gap-3">
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleUpdate(knowledge)}
+                                className="p-1.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500 hover:text-white transition"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Update
+                              </div>
+                            </div>
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleDelete(knowledge.id)}
+                                className="p-1.5 bg-red-500/10 text-red-400 rounded-md hover:bg-red-500 hover:text-white transition"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Delete
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-gray-500">No data found</td>
+                    </tr>
+                  )}
               </tbody>
             </table>
           </div>

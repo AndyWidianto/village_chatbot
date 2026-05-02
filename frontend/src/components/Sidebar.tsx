@@ -29,10 +29,10 @@ export default function Sidebar({ sidebars, openSidebar, handleToggleSidebar, ha
         {/* Logo Section */}
         <div className="flex items-center gap-3 px-6 h-20 mb-4">
           <div className="w-9 h-9 bg-gradient-to-tr from-orange-600 to-orange-400 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
-            <div className="w-4 h-4 bg-white rounded-sm rotate-45"></div>
+            <img src="/icons/apple-touch-icon.png" alt="logo" className="w-full h-full rounded-sm" />
           </div>
           <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Evolve<span className="text-orange-500">WA</span>
+            Chat<span className="text-blue-500">BOT</span>
           </span>
         </div>
 

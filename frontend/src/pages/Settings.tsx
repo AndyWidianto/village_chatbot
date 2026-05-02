@@ -40,7 +40,12 @@ const ProfileSettings = () => {
         errors,
         isOpenQrCode,
         handleSelectDevice,
-        selectDevice
+        selectDevice,
+        refInputImages,
+        handleChangeImage,
+        handleUpload,
+        laodingUpload,
+        showImage
     } = useSetting();
 
     const Role = () => {
@@ -90,12 +95,21 @@ const ProfileSettings = () => {
                         <div className="relative group">
                             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-700 shadow-2xl transition-transform duration-300 group-hover:scale-105">
                                 <img
-                                    src="https://ui-avatars.com/api/?name=Andy+Widianto&background=4f46e5&color=fff&size=128"
+                                    src={showImage ? showImage : user?.profileUrl || "/default.png"}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                            <button className="absolute bottom-1 right-1 p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-xl transition-all hover:scale-110 active:scale-95">
+                            <input
+                                type="file"
+                                name="image"
+                                id="imageInput"
+                                accept="image/*"
+                                onChange={handleChangeImage}
+                                ref={refInputImages}
+                                hidden
+                            />
+                            <button onClick={() => refInputImages.current?.click()} className="absolute bottom-1 right-1 p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-xl transition-all hover:scale-110 active:scale-95">
                                 <Camera className="w-5 h-5" />
                             </button>
                         </div>
@@ -113,8 +127,10 @@ const ProfileSettings = () => {
                             </div>
                         </div>
 
-                        <button className="group flex items-center gap-2 px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:translate-y-0">
-                            <Save className="w-5 h-5 group-hover:animate-pulse" /> Simpan Perubahan
+                        <button onClick={handleUpload} className="group flex items-center gap-2 px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:translate-y-0">
+                            <Loading loading={laodingUpload}>
+                                <Save className="w-5 h-5 group-hover:animate-pulse" /> Simpan Perubahan
+                            </Loading>
                         </button>
                     </div>
                 </div>
@@ -207,7 +223,7 @@ const ProfileSettings = () => {
                                             <div className="flex items-center gap-2">
                                                 {/* Connection Button */}
                                                 <button
-                                                    onClick={() => handleSelectDevice(device)} 
+                                                    onClick={() => handleSelectDevice(device)}
                                                     title="Reconnect Instance"
                                                     className="p-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all shadow-sm active:scale-90"
                                                 >

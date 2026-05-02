@@ -2,11 +2,11 @@
 import { Tag, MessageSquare, CheckCheck, BotMessageSquare } from 'lucide-react';
 import { ButtonPrimary } from '../../components/Buttons';
 import { Input, Select, Textarea } from '../../components/Inputs';
-import useAutoreply from '../../hooks/autoreply';
+import useCreateAutoreply from '../../hooks/createAutoreply';
 
 const CreateAutoReply = () => {
   // const refFileInput = useRef<HTMLInputElement | null>(null);
-  const { setFormData, formData, handleSubmit } = useAutoreply();
+  const { setFormData, formData, handleSubmit } = useCreateAutoreply();
 
   return (
     <div className="p-6 dark:bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors">

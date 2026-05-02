@@ -85,11 +85,11 @@ export default function useAutoreply() {
         if (!lastId) {
             setOldLastId([""]);
         }
+        setLoading(true);
 
         try {
             const res = await axiosPrivate.get(`/autoreplies?limit=${20}${query}`);
             const data = res.data;
-            console.log(searchTerm);
 
             setAutoreplies(data.autoreplies);
             setTotalPages(data.totalPage);
@@ -107,6 +107,8 @@ export default function useAutoreply() {
             });
 
             console.error("Fetch Error:", err);
+        } finally {
+            setLoading(false);
         }
     }
     const updateAutoreply = async () => {
@@ -158,45 +160,6 @@ export default function useAutoreply() {
             setLoading(false);
         }
     };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
-        try {
-            const res = await axiosPrivate.post(`/autoreplies`, formData);
-            const newData = res.data;
-
-            setAutoreplies(prev => [newData, ...prev]);
-
-            toast.success("Autoreply baru berhasil ditambahkan", {
-                duration: 3000,
-                position: 'top-right',
-                style: {
-                    borderRadius: '12px',
-                    background: '#10b981',
-                    color: '#fff',
-                },
-            });
-        } catch (err: any) {
-            const rawMessage = err.response?.data?.message || "Gagal menyimpan data";
-            const errorMessage = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
-
-            toast.error(errorMessage, {
-                duration: 5000,
-                position: 'top-right',
-                style: {
-                    borderRadius: '12px',
-                    background: '#e11d48',
-                    color: '#fff',
-                },
-            });
-
-            console.error("Submission Error:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
     const handleCurrent = () => {
         if (lastId) {
             setOldLastId([...oldLastId, lastId]);
@@ -242,7 +205,6 @@ export default function useAutoreply() {
         setFormData,
         formData,
         loading,
-        handleSubmit,
         handleCurrent,
         handlePrev
     }

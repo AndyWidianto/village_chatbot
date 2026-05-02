@@ -40,6 +40,7 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
         refNotification,
         setSearchTerm,
         getGreeting,
+        user,
         refProfile } = useHeaderHook();
 
     return (
@@ -174,7 +175,7 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
                                 onClick={() => setIsOpenProfile(!isOpenProfile)}
                                 className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-700"
                             >
-                                <img src="https://i.pravatar.cc/150?u=anima" alt="avatar" />
+                                <img src={user?.profileUrl} alt="avatar" />
                             </button>
                             {isOpenProfile && (
                                 <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl z-[99] overflow-hidden animate-in fade-in zoom-in duration-150">
@@ -182,7 +183,7 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
                                     {/* User Info Header */}
                                     <div className="px-4 py-4 bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akun Saya</p>
-                                        <p className="text-sm font-medium dark:text-white mt-1 truncate">admin@whatsapp.com</p>
+                                        <p className="text-sm font-medium dark:text-white mt-1 truncate">{user?.email}</p>
                                     </div>
 
                                     <div className="p-1.5">

@@ -15,33 +15,37 @@ import LoginPage from './pages/Login'
 import Authorization from './Authorization'
 import CreateKnowledgePage from './pages/Knowledge/CreateKnowledge'
 import Home from './pages/Home'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 
 export default function App() {
+  const queryClient = new QueryClient();
   return (
-    <ThemeProvider> 
+    <ThemeProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Authorization><Layout /></Authorization>}>
-            <Route index element={<Dashboard />} />
-            <Route path="autoreply" element={<AutoReply />} />
-            <Route path="autoreply/create" element={<CreateAutoReply />} />
-            <Route path="broadcasts" element={<Broadcast />} />
-            <Route path="broadcasts/create" element={<CreateBroadcast />} />
-            <Route path="devices" element={<Device />} />
-            <Route path="knowledge-base" element={<Knowledge />} />
-             <Route path="knowledge-base/create" element={<CreateKnowledgePage />} />
-            <Route path="tasks" element={<Dashboard />} />
-            <Route path="settings" element={<ProfileSettings />} />
-            <Route path="notifications" element={<Notification />} />
-          </Route>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Authorization><Layout /></Authorization>}>
+              <Route index element={<Dashboard />} />
+              <Route path="autoreply" element={<AutoReply />} />
+              <Route path="autoreply/create" element={<CreateAutoReply />} />
+              <Route path="broadcasts" element={<Broadcast />} />
+              <Route path="broadcasts/create" element={<CreateBroadcast />} />
+              <Route path="devices" element={<Device />} />
+              <Route path="knowledge-base" element={<Knowledge />} />
+              <Route path="knowledge-base/create" element={<CreateKnowledgePage />} />
+              <Route path="tasks" element={<Dashboard />} />
+              <Route path="settings" element={<ProfileSettings />} />
+              <Route path="notifications" element={<Notification />} />
+            </Route>
 
-          <Route path="login" element={<LoginPage />} />
+            <Route path="login" element={<LoginPage />} />
 
-          {/* Test Page */}
-          <Route path="/test" element={<h2>Hallo</h2>} />
-        </Routes>
+            {/* Test Page */}
+            <Route path="/test" element={<h2>Hallo</h2>} />
+          </Routes>
+        </QueryClientProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

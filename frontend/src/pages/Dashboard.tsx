@@ -7,11 +7,11 @@ import useDashboard from '../hooks/dashboard';
 
 export default function Dashboard() {
     const {
-        stats,
         matricStat,
         lineChartOptions,
         lineChartSeries,
-        notifications
+        notifications,
+        statUser
     } = useDashboard();
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-2">
@@ -39,9 +39,9 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center justify-between flex-1 gap-4">
                     <div className="md:block lg:flex gap-4 space-y-5">
-                        <StatItem label="Inactive" value={stats.inactiveUser} color="bg-orange-400" />
-                        <StatItem label="Active" value={stats.activeUser} color="bg-emerald-400" />
-                        <StatItem label="Total" value={stats.totalUser} color="bg-slate-800 dark:bg-white" />
+                        <StatItem label="Inactive" value={statUser?.inactive} color="bg-orange-400" />
+                        <StatItem label="Active" value={statUser?.active} color="bg-emerald-400" />
+                        <StatItem label="Total" value={statUser?.total} color="bg-slate-800 dark:bg-white" />
                     </div>
 
                     {/* Enhanced Progress Circle */}
@@ -95,7 +95,7 @@ export default function Dashboard() {
                     </button>
                 </div>
                 <div className="relative space-y-6 before:absolute before:left-[-10px] before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-100 dark:before:bg-slate-800">
-                    {notifications.map(notif => (
+                    {notifications && notifications.map(notif => (
                         <div key={notif.id}>
                             <NotificationItem name={notif.user.name} action={notif.title} time={notif.createdAt} />
                         </div>

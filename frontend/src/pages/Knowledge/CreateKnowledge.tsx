@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Edit3, Upload, Save, X, FileSearch } from 'lucide-react';
-import useKnowledge from '../../hooks/knowledge';
 import Loading from '../../components/Loading';
+import useCreateKnowledge from '../../hooks/createKnowledge';
 
 type KnowledgeMode = 'manual' | 'file';
 
@@ -13,7 +13,7 @@ export default function CreateKnowledgePage() {
         loading,
         setFormData,
         formData
-    } = useKnowledge();
+    } = useCreateKnowledge();
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 md:p-10">

@@ -28,7 +28,7 @@ export class ChatbotService {
             searchMessage = await this.ollama.reWrite(data.id, data.message);
         }
 
-        const userVector = await this.ollama.embeddings(searchMessage);
+        const userVector = await this.ollama.embeddingsGemini(searchMessage);
         const vectorString = `[${userVector.join(',')}]`;
 
         const contextChunks = await this.prisma.$queryRaw<KnowledgeChunk[]>`

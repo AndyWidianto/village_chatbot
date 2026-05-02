@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import useAxios from "../lib/axios.service";
 import { toast } from "sonner";
 import type { Device } from "../lib/types";
@@ -13,11 +13,13 @@ export default function useSetting() {
         name: "",
         instanceName: ""
     });
+    const [laodingUpload, setLoadingUpload] = useState(false);
     const [loadingUser, setLoadingUser] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenQrCode, setIsOpenQrCode] = useState(false);
     const [selectDevice, setSelectDevice] = useState<Device | null>(null);
     const [devices, setDevices] = useState<Device[]>([]);
+    const [showImage, setShowImage] = useState<string | null>(null);
     const [formDataUser, setFormDataUser] = useState({
         username: "",
         email: "",
@@ -29,6 +31,8 @@ export default function useSetting() {
         confirmPassword: ""
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [image, setImage] = useState<File | null>(null);
+    const refInputImages = useRef<HTMLInputElement | null>(null);
 
     const fetchDevices = async () => {
         setLoading(true);
@@ -123,7 +127,8 @@ export default function useSetting() {
                 username: data.username,
                 email: data.email,
                 role: data.role,
-                id: data.id
+                id: data.id,
+                profileUrl: data.profileUrl
             });
             console.log(data);
             toast.success("Update user Berhasil");
@@ -203,6 +208,64 @@ export default function useSetting() {
             setLoadingUser(false);
         }
     }
+    const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const maxSize = 2 * 1024 * 1024;
+
+        if (file.size > maxSize) {
+            toast.warning("Ukuran file terlalu besar! Maksimal adalah 2MB.");
+            e.target.value = "";
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error("Format file tidak didukung. Gunakan JPEG, PNG, atau WebP.");
+            e.target.value = "";
+            return;
+        }
+        const imageUrl = URL.createObjectURL(file);
+        setShowImage(imageUrl);
+        setImage(file);
+
+    };
+    const handleUpload = async () => {
+        if (!image) return;
+        if (!confirm("Apakah anda yakin ingin mengganti profile?")) return;
+        setLoadingUpload(true);
+        try {
+            const dataToSend = new FormData();
+            dataToSend.append("file", image);
+            const res = await axiosPrivate.post("/users/upload", dataToSend);
+            const data = res.data;
+            setUser({
+                name: data.name,
+                username: data.username,
+                email: data.email,
+                role: data.role,
+                id: data.id,
+                profileUrl: data.profileUrl
+            });
+            console.log(data);
+            toast.success("Update profile Berhasil");
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Gagal update profile";
+            toast.error(errorMessage, {
+                duration: 4000,
+                position: 'top-right',
+                style: {
+                    borderRadius: '12px',
+                    background: '#1e293b',
+                    color: '#fff',
+                },
+            });
+
+            console.error("Fetch Error:", err);
+        } finally {
+            setLoadingUpload(false);
+        }
+    }
     const handleSelectDevice = (device: Device) => {
         setIsOpenQrCode(true);
         setSelectDevice(device);
@@ -244,6 +307,11 @@ export default function useSetting() {
         setIsOpenQrCode,
         setSelectDevice,
         selectDevice,
-        handleSelectDevice
+        handleSelectDevice,
+        refInputImages,
+        handleChangeImage,
+        showImage,
+        laodingUpload,
+        handleUpload
     }
 }

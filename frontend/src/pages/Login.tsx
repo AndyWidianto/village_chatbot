@@ -17,13 +17,13 @@ export default function LoginPage() {
         <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-blue-600 to-gray-400 text-white relative">
           <div className="relative z-10">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/30">
-               <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
+               <img src="/icons/apple-touch-icon.png" alt="logo chatbot" className="w-full h-full bg-white rounded-sm" />
             </div>
             <h1 className="text-4xl font-bold leading-tight mb-4 tracking-tight">
-              Automate your <br /> WhatsApp business.
+              Automasi layanan <br />  WhatsApp desa.
             </h1>
             <p className="text-gray-50/80 max-w-sm">
-              Kelola ribuan pesan, otomatisasi balasan, dan tingkatkan konversi pelanggan dengan platform EvolveWA.
+              Kelola pesan warga, berikan balasan otomatis, dan tingkatkan kualitas pelayanan publik dengan platform EvolveWA.
             </p>
           </div>
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="p-8 md:p-16 flex flex-col justify-center">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Selamat Datang</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">Silakan masuk ke akun EvolveWA Anda</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Silakan masuk ke akun Anda</p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>

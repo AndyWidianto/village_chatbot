@@ -1,40 +1,20 @@
-async function addDevice() {
-    const url = 'http://localhost:3000/api/device';
-    
-    console.log("🚀 Memulai proses pengiriman data secara bertahap...");
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-    for (let i = 0; i < 20; i++) {
-        const deviceData = { 
-            name: `Andy${i + 1}`, 
-            number: "081228895144", 
-            status: "CONNECTED" 
-        };
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(deviceData), // Kirim 1 objek saja per request
-            });
+const genAI = new GoogleGenerativeAI();
+async function embeddingsGemini() {
+    const model = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
+    const result = await model.embedContent({
+        content: {
+            // 'role' biasanya tidak diperlukan untuk embedding, cukup 'parts'
+            parts: [{ text: "Teks ini akan diubah jadi vektor 1024 dimensi" }]
+        },
+        outputDimensionality: 1024,
+    });
 
-            if (!response.ok) {
-                console.error(`❌ Gagal kirim data ke-${i + 1}: Status ${response.status}`);
-            } else {
-                const result = await response.json();
-                console.log(`✅ Berhasil [${i + 1}/20]: ${deviceData.name}`);
-            }
-
-            // Opsional: Kasih jeda sedikit (misal 100ms) agar server tidak kaget
-            // await new Promise(resolve => setTimeout(resolve, 100));
-
-        } catch (error) {
-            console.error(`💥 Error pada data ke-${i + 1}:`, error.message);
-        }
-    }
-    
-    console.log("🏁 Semua proses pengiriman selesai.");
+    const embedding = result.embedding;
+    console.log(embedding);
+    return embedding;
 }
 
-addDevice();
+embeddingsGemini()
