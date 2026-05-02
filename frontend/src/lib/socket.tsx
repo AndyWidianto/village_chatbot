@@ -10,8 +10,9 @@ interface ClientToServerEvents {
     send_message: (data: any) => void;
 }
 
+const urlWebsocket = import.meta.env.VITE_URL_WEBSOCKET!;
 export default function useSocket({ accessToken }: { accessToken: string | null }) {
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("ws://localhost:3000", {
+    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(urlWebsocket|| "ws://localhost:3000", {
         auth: {
             token: `Bearer ${accessToken}`
         },
