@@ -18,6 +18,9 @@ export class KnowledgeService {
     ) { }
 
     async createKnowledge(user: PayloadJWT, data: CreateKnowledgeAI) {
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+        }
         let rawText = data.content || '';
         let chunks: string[] = [];
         const chunkSize = 1000;
@@ -181,6 +184,9 @@ export class KnowledgeService {
     }
 
     async deleteKnowledge(user: PayloadJWT, id: string) {
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+        }
         const exisitng = await this.findOne(id);
         await this.prisma.knowledge.delete({
             where: { id: exisitng.id }
@@ -206,6 +212,9 @@ export class KnowledgeService {
     }
 
     async updateKnowledge(user: PayloadJWT, id: string, data: Partial<CreateKnowledgeAI>) {
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+        }
         const existing = await this.findOne(id);
         const updateKnowledge = await this.prisma.knowledge.update({
             where: { id: existing.id },

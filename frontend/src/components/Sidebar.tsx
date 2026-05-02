@@ -6,9 +6,10 @@ interface SidebarProps {
   sidebars: any;
   handleToggleSidebar: () => void;
   handleHeaderContent?: (context: { title: string; description: string }) => void;
+  logout: () => void;
 }
 
-export default function Sidebar({ sidebars, openSidebar, handleToggleSidebar, handleHeaderContent }: SidebarProps) {
+export default function Sidebar({ sidebars, openSidebar, handleToggleSidebar, handleHeaderContent, logout }: SidebarProps) {
   return (
     <>
       {/* Overlay dengan backdrop blur */}
@@ -73,7 +74,7 @@ export default function Sidebar({ sidebars, openSidebar, handleToggleSidebar, ha
         {/* Bottom Section / Logout */}
         <div className="p-4 border-t border-gray-100 dark:border-slate-800">
           <button 
-            onClick={() => alert('Logout logic...')}
+            onClick={() => logout()}
             className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all duration-200"
           >
             <LogOut size={18} />

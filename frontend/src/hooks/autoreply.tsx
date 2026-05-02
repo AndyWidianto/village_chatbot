@@ -27,7 +27,7 @@ export default function useAutoreply() {
     const [totalPages, setTotalPages] = useState(100);
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
+        if (window.confirm("Are you sure you want to delete this autoreply?")) {
             try {
                 const res = await axiosPrivate.delete(`/autoreplies/${id}`);
                 const data = res.data;
@@ -145,7 +145,7 @@ export default function useAutoreply() {
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal memperbarui data";
 
-            toast.error(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage, {
+            toast.error(errorMessage, {
                 duration: 4000,
                 position: 'top-right',
                 style: {

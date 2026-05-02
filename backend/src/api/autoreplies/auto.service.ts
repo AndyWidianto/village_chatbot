@@ -1,7 +1,7 @@
 import { PrismaService } from "../../lib/prisma/prisma.service";
 import { TypeNotification } from "../../lib/shared/notification";
 import { CreateAutoreplies, PayloadJWT, UpdateAutoreplies } from "../../lib/types";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 
 @Injectable()
@@ -14,6 +14,10 @@ export class AutoreplyService {
         }
         if (data.type === "keyword" && !data.replyContent) {
             throw new NotFoundException("content is required");
+        }
+
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
         }
 
         const newAuto = await this.prisma.autoreply.create({
@@ -36,6 +40,9 @@ export class AutoreplyService {
         }
         if (data.type === "keyword" && !data.replyContent) {
             throw new NotFoundException("content is required");
+        }
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
         }
 
         const updateAutoreply = await this.prisma.autoreply.update({
@@ -118,6 +125,9 @@ export class AutoreplyService {
         return existing;
     }
     async delete(user: PayloadJWT, id: string) {
+        if (user.role === "review") {
+            throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+        }
         const existing = await this.getOne(id);
         await this.prisma.autoreply.delete({
             where: { id: existing.id }

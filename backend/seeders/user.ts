@@ -60,7 +60,7 @@ export async function userSeeders() {
       name: 'andy',
       email: 'andywidianto56@gmail.com',
       password: "developer1234&",
-      role: UserRole.review,
+      role: UserRole.super_admin,
       username: "andywidianto",
       updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     },

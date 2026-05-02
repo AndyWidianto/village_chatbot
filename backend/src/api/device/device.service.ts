@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../lib/prisma/prisma.service';
 import { EvolutionService } from '../../lib/evolutions/evolutions.service';
 import { CreateDevice, PayloadJWT } from '../../lib/types';
@@ -13,6 +13,9 @@ export class DeviceService {
   ) { }
 
   async create(user: PayloadJWT, { name, instanceName }: CreateDevice) {
+    if (user.role === "review") {
+      throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+    }
     const instance = await this.evolution.createInstance({ instanceName });
     const newDevice = await this.prisma.device.create({
       data: { id: instance.instance.instanceId, name, instanceName }
@@ -41,7 +44,10 @@ export class DeviceService {
     return { message: "Setting webhook successfully" }
   }
 
-  async connectDevice(id: string) {
+  async connectDevice(user: PayloadJWT, id: string) {
+    if (user.role === "review") {
+      throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+    }
     const device = await this.getOne(id)
     const instance = await this.evolution.instanceConnect(device.instanceName);
     return instance;
@@ -75,7 +81,10 @@ export class DeviceService {
     return existing;
   }
 
-  async delete(user: PayloadJWT,id: string) {
+  async delete(user: PayloadJWT, id: string) {
+    if (user.role === "review") {
+      throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
+    }
     const device = await this.getOne(id);
     await this.evolution.instanceDelete(device.instanceName);
     await this.prisma.device.delete({

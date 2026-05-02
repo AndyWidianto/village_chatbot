@@ -62,15 +62,15 @@ interface Checkbox extends Omit<InputProps, "value"> {
 export function InputCheckbox({ icon, onChange, title, isActive, description }: Checkbox) {
     const Icon = icon;
     return (
-        <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-500/5 rounded-2xl border border-orange-100 dark:border-orange-500/10">
+        <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-500/5 rounded-2xl border border-blue-100 dark:border-blue-500/10">
             <div className="flex items-center gap-3">
-                <Icon className={isActive ? "text-orange-500" : "text-slate-400"} />
+                <Icon className={isActive ? "text-blue-500" : "text-slate-400"} />
                 <div>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{title}</p>
                     <p className="text-[10px] text-slate-500">{description || "Nonaktifkan untuk sementara"}</p>
                 </div>
             </div>
-            <input type="checkbox" onChange={onChange} defaultChecked={isActive} className="w-5 h-5 accent-orange-500 cursor-pointer" />
+            <input type="checkbox" onChange={onChange} defaultChecked={isActive} className="w-5 h-5 accent-blue-500 cursor-pointer" />
         </div>
     )
 }

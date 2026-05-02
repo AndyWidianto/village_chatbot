@@ -1,7 +1,7 @@
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 import {
   LayoutDashboard,
   CheckSquare, Settings,
@@ -16,6 +16,8 @@ import useSocket from '../lib/socket';
 import NotificationModal from './NotificationModal';
 import { useAuthStore } from '../lib/store/authStore';
 import useChatbot from '../hooks/chatbot';
+import { toast } from 'sonner';
+import useAxios from '../lib/axios.service';
 
 
 interface IncomeMessage {
@@ -24,7 +26,8 @@ interface IncomeMessage {
   number: string;
 }
 export default function Layout() {
-  const { accessToken } = useAuthStore();
+  const { accessToken, logout } = useAuthStore();
+  const { axiosPrivate } = useAxios();
   const { socket } = useSocket({ accessToken });
   const [openSidebar, setOpenSidebar] = useState(true);
   const [headerContent, setHeaderContent] = useState({
@@ -126,7 +129,7 @@ export default function Layout() {
     }
   ];
   const { messages, setMessage, message, handleChatbot, loading } = useChatbot({ sessionId: sessionId || "" });
-
+  const navigate = useNavigate();
   const toggleSidebar = () => {
     setOpenSidebar(!openSidebar);
   }
@@ -139,6 +142,25 @@ export default function Layout() {
     const id = crypto.randomUUID();
     setSessionId(id);
   };
+const handleLogout = async () => {
+  if (!confirm("Apakah anda yakin ingin logout?")) return;
+    try {
+        await axiosPrivate.post("/logout");
+        localStorage.removeItem("accessToken"); 
+        navigate("/login");
+        toast.success("Berhasil logout", {
+            style: {
+                borderRadius: '12px',
+                background: '#1e293b',
+                color: '#fff',
+            },
+        });
+        logout();
+    } catch (err: any) {
+        console.error("Logout Error:", err);
+        navigate("/login");
+    }
+};
   useEffect(() => {
     setRandomId();
     socket.on("connect", () => {
@@ -153,11 +175,21 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen p-6 bg-gray-100 dark:bg-background dark:text-white w-full h-full">
       {/* Sidebar */}
-      <Sidebar openSidebar={openSidebar} sidebars={sidebars} handleToggleSidebar={toggleSidebar} handleHeaderContent={setHeaderContent} />
+      <Sidebar 
+      openSidebar={openSidebar} 
+      sidebars={sidebars} 
+      handleToggleSidebar={toggleSidebar} 
+      handleHeaderContent={setHeaderContent} 
+      logout={handleLogout}
+      />
 
       {/* Main Content */}
       <main className={`flex-1 min-w-0 md:pl-2 ${openSidebar ? 'lg:ml-55' : 'ml-0 lg:ml-55'} transition-all duration-300`}>
-        <Header handleToggleSidebar={toggleSidebar} headerContent={headerContent} />
+        <Header 
+        handleToggleSidebar={toggleSidebar} 
+        headerContent={headerContent} 
+        logout={handleLogout}
+        />
         <div className="mt-15"></div>
         <div className="pl-4">
           <Outlet />

@@ -18,6 +18,22 @@ export class KnowledgeController {
         return this.service.createKnowledge(user, { ...body, file });
     }
 
+    // @Get("model-ai")
+    // async Model() {
+    //     try {
+    //         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+    //         const data = await response.json();
+
+    //         console.log("Daftar Model Tersedia:");
+    //         data.models.forEach(m => {
+    //             console.log(`- Nama: ${m.name}`);
+    //             console.log(`  Kemampuan: ${m.supportedGenerationMethods.join(", ")}`);
+    //         });
+    //         return data;
+    //     } catch (error) {
+    //         console.error("Gagal ambil list model:", error);
+    //     }
+    // }
     @UseGuards(AuthGuard("jwt"))
     @Delete(":id")
     async deleteKnowlege(@Req() req: RequestAndPayload, @Param("id") id: string) {

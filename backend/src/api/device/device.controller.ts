@@ -24,8 +24,9 @@ export class DeviceController {
 
     @Post("connection/:id")
     @UseGuards(AuthGuard("jwt"))
-    async connectionDevice(@Param("id") id: string) {
-        return this.deviceService.connectDevice(id);
+    async connectionDevice(@Req() req: RequestAndPayload, @Param("id") id: string) {
+        const user = req.user;
+        return this.deviceService.connectDevice(user, id);
     }
 
     @Delete(":id")

@@ -25,7 +25,7 @@ export default function FormModal({ onSave, onClose, children, title, loading } 
             {/* Footer */}
             <div className="p-8 pt-4 flex gap-3">
                 <button onClick={onClose} className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Batal</button>
-                <button onClick={onSave} className="flex-[2] py-3.5 rounded-2xl text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95">
+                <button onClick={onSave} className="flex-[2] py-3.5 rounded-2xl text-sm font-bold bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95">
                     <Loading loading={loading}>
                         <Save size={18} /> Simpan Perubahan
                     </Loading>
