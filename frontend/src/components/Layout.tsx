@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import MotionModal from './Motion';
 import ChatModal from './ChatModal';
-import useSocket from '../lib/socket';
+// import useSocket from '../lib/socket';
 import NotificationModal from './NotificationModal';
 import { useAuthStore } from '../lib/store/authStore';
 import useChatbot from '../hooks/chatbot';
@@ -26,9 +26,9 @@ interface IncomeMessage {
   number: string;
 }
 export default function Layout() {
-  const { accessToken, logout } = useAuthStore();
+  const { accessToken: _, logout } = useAuthStore();
   const { axiosPrivate } = useAxios();
-  const { socket } = useSocket({ accessToken });
+  // const { socket } = useSocket({ accessToken });
   const [openSidebar, setOpenSidebar] = useState(true);
   const [headerContent, setHeaderContent] = useState({
     title: "Dashboard",
@@ -163,13 +163,13 @@ const handleLogout = async () => {
 };
   useEffect(() => {
     setRandomId();
-    socket.on("connect", () => {
-      console.log("connect successfully");
-    })
-    socket.on("receiver_message", (data) => {
-      console.log(data);
-      setIncomeMessage(data);
-    })
+    // socket.on("connect", () => {
+    //   console.log("connect successfully");
+    // })
+    // socket.on("receiver_message", (data) => {
+    //   console.log(data);
+    //   setIncomeMessage(data);
+    // })
   }, []);
 
   return (
