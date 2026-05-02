@@ -58,14 +58,30 @@ export class KnowledgeService {
         if (rawText && rawText.trim()) {
             chunks = this.splitText(rawText, chunkSize, chunkOverlap);
         }
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const chunkData: { content: string; vector: string }[] = [];
+        const batchSize = 100; // Sesuai limit Gemini Free Tier
 
-        const chunkData = await Promise.all(chunks.map(async (chunk) => {
-            const vector = await this.ollama.embeddingsGemini(chunk);
-            return {
-                content: chunk,
-                vector: `[${vector.join(',')}]`
-            };
-        }));
+        for (let i = 0; i < chunks.length; i += batchSize) {
+            // Ambil potongan 100 data
+            const batch = chunks.slice(i, i + batchSize);
+
+            console.log(`Memproses batch ${Math.floor(i / batchSize) + 1}...`);
+
+            const results = await Promise.all(batch.map(async (chunk) => {
+                const vector = await this.ollama.embeddingsGemini(chunk);
+                return {
+                    content: chunk,
+                    vector: `[${vector.join(',')}]`
+                };
+            }));
+
+            chunkData.push(...results);
+            if (i + batchSize < chunks.length) {
+                console.log("Limit batch tercapai. Menunggu 60 detik agar tidak 429...");
+                await delay(63000);
+            }
+        }
 
         const values = chunkData.map((d) => {
             return Prisma.sql`(
