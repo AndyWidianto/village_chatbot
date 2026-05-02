@@ -5,9 +5,11 @@ import { toast } from 'sonner';
 import type { Notification, StatDashboard, StatMessage, StatUser } from '../lib/types';
 import type { ApexOptions } from 'apexcharts';
 import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from '../lib/store/authStore';
 
 export default function useDashboard() {
     const { theme } = useTheme();
+    const { user } = useAuthStore();
     const { axiosPrivate } = useAxios();
     const [userStat, setUserStat] = useState({
         activeUser: 0,
@@ -18,7 +20,6 @@ export default function useDashboard() {
         try {
             const res = await axiosPrivate.get(`/messages/stats`);
             const data: StatMessage = res.data;
-            console.log(data);
             return data;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data Messages";
@@ -61,6 +62,7 @@ export default function useDashboard() {
         try {
             const res = await axiosPrivate.get(`/notifications`);
             const data: Notification[] = res.data;
+            console.log(data);
             return data;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data notification";
@@ -116,7 +118,7 @@ export default function useDashboard() {
         queryFn: fetchStatUser,
         staleTime: 5 * 60 * 1000,
     });
-    const { data: notifications } = useQuery({
+    const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
         queryKey: ["notifications"],
         queryFn: fetchNotifications,
         staleTime: 5 * 60 * 1000,
@@ -129,7 +131,7 @@ export default function useDashboard() {
     const matricStat = [
         {
             id: 1,
-            title: lineChartSeries[0].data.length,
+            title: lineChartSeries[0].data.reduce((acc, curr) => acc + curr, 0),
             des: "Total Messages",
             sub: "",
         },
@@ -172,6 +174,8 @@ export default function useDashboard() {
         statMessage,
         isLoadingStatMessage,
         statUser,
-        isLoadingStatUser
+        isLoadingStatUser,
+        isLoadingNotifications,
+        user
     }
 }

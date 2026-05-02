@@ -74,6 +74,14 @@ export class ChatbotService {
                 answer: existing.replyContent,
             }
         }
-        return await this.chatbot({ id, message });
+        const chatbot = await this.chatbot({ id, message });
+        await this.prisma.message.create({
+            data: {
+                type: "text",
+                content: message,
+                remoteJid: "web",
+            }
+        });
+        return chatbot;
     }
 }

@@ -16,7 +16,6 @@ export class NotificationService {
             query = {
                 ...query,
                 cursor: { id: lastId },
-                skip: 1
             }
         }
         if (limitStr) {
@@ -24,7 +23,7 @@ export class NotificationService {
         }
         query = {
             ...query,
-            take: limit,
+            take: limit + 1,
             orderBy: {
                 createdAt: "desc"
             },
@@ -33,7 +32,8 @@ export class NotificationService {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        profileUrl: true
                     }
                 }
             }

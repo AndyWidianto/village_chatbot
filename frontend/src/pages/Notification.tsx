@@ -1,134 +1,117 @@
-
-const notifications = [
-  {
-    id: 1,
-    user: "Paul Svensson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Paul",
-    action: "invite you to",
-    target: "Prototyping",
-    time: "Now",
-    category: "Courses",
-    type: "invite",
-    unread: true,
-  },
-  {
-    id: 2,
-    user: "Adam Nolan",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Adam",
-    action: "mentioned you in",
-    target: "UX Basics",
-    time: "9h ago",
-    category: "Notes",
-    unread: true,
-  },
-  {
-    id: 3,
-    user: "Paul Morgan",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Morgan",
-    action: "commented in",
-    target: "UI Design",
-    time: "9h ago",
-    category: "Blog",
-    unread: false,
-  },
-  {
-    id: 4,
-    user: "Anna Miller",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anna",
-    action: "upload a file",
-    target: "",
-    time: "9h ago",
-    category: "Courses",
-    file: { name: "Cover-Templates", size: "9mb" },
-    unread: false,
-  },
-  {
-    id: 5,
-    user: "Robert Babiński",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Robert",
-    action: "said nothing important",
-    target: "",
-    time: "9h ago",
-    category: "Spam",
-    unread: false,
-  },
-];
+import { formatDistanceToNow } from "date-fns";
+import useNotification from "../hooks/notification";
+import { id } from "date-fns/locale";
 
 export default function Notification() {
+  const { notifications, hasMore, fetchNotifications, loading } = useNotification();
   return (
     <div className="min-h-screen dark:bg-background flex justify-center py-10 px-4">
       <div className="w-full bg-white dark:bg-zinc-900 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-zinc-800">
-        
+
         {/* Header */}
         <div className="p-6 pb-2">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
-          
+
           {/* Tabs */}
           <div className="flex gap-6 mt-6 border-b border-gray-100 dark:border-zinc-800">
-            <button className="pb-3 border-b-2 border-red-500 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            {/* <button className="pb-3 border-b-2 border-red-500 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               Unread <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">2</span>
-            </button>
-            <button className="pb-3 text-sm font-medium text-gray-400 dark:text-zinc-500 hover:text-gray-600">All</button>
+            </button> */}
+            <button className="pb-3 border-b-2 border-red-500 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">All</button>
           </div>
         </div>
 
         {/* List */}
-        <div className="divide-y divide-gray-50 dark:divide-zinc-800/50">
-          {notifications.map((item) => (
-            <div 
-              key={item.id} 
-              className={`p-5 transition-colors ${item.unread ? 'bg-gray-50/50 dark:bg-zinc-800/30' : 'bg-white dark:bg-zinc-900'}`}
-            >
-              <div className="flex gap-4">
-                <img 
-                  src={item.avatar} 
-                  alt={item.user} 
-                  className="w-12 h-12 rounded-full bg-gray-200 dark:bg-zinc-800"
-                />
-                
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-baseline gap-1">
-                    <span className="font-bold text-gray-900 dark:text-zinc-100">{item.user}</span>
-                    <span className="text-gray-500 dark:text-zinc-400 text-sm">{item.action}</span>
-                    {item.target && (
-                      <span className="font-bold text-gray-900 dark:text-zinc-100 text-sm">{item.target}</span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-gray-400 dark:text-zinc-500">{item.time}</span>
-                    <span className="text-gray-300 dark:text-zinc-700">•</span>
-                    <span className="text-xs text-gray-400 dark:text-zinc-500">{item.category}</span>
+        <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
+          {notifications.map((item) => {
+            let parsedContent: any = { message: "" };
+            try {
+              parsedContent = item.content ? JSON.parse(item.content) : {};
+            } catch (e) {
+              console.error("Gagal parse JSON content", e);
+              parsedContent = { message: item.content };
+            }
+
+            return (
+              <div
+                key={item.id}
+                className={`group relative p-5 transition-all duration-300 hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 ${!item.isRead ? 'bg-blue-50/30 dark:bg-blue-500/5' : 'bg-white dark:bg-zinc-900'
+                  }`}
+              >
+                {!item.isRead && (
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                )}
+
+                <div className="flex gap-4">
+                  <div className="relative shrink-0">
+                    <img
+                      src={item.user.profileUrl || "/default-avatar.png"}
+                      alt={item.user.name}
+                      className="w-12 h-12 rounded-full bg-slate-200 dark:bg-zinc-800 object-cover ring-2 ring-white dark:ring-zinc-900 shadow-sm"
+                    />
                   </div>
 
-                  {/* Conditional Rendering for Invite Buttons */}
-                  {item.type === 'invite' && (
-                    <div className="flex gap-2 mt-3">
-                      <button className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-md transition-colors">
-                        Join
-                      </button>
-                      <button className="px-4 py-1.5 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                        Decline
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <span className="font-bold text-slate-900 dark:text-zinc-100">
+                          {item.user.name}
+                        </span>
+                        <span className="text-slate-500 dark:text-zinc-400 text-sm">
+                          {item.title}
+                        </span>
+                      </div>
 
-                  {/* Conditional Rendering for File attachment */}
-                  {item.file && (
-                    <div className="mt-3 p-3 border border-gray-100 dark:border-zinc-800 rounded-lg flex items-center gap-3 bg-white dark:bg-zinc-900 shadow-sm w-fit pr-8">
-                      <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" className="w-4 h-4" alt="figma" />
+                      <p className="text-sm text-slate-600 dark:text-zinc-400 mt-1 italic">
+                        "{parsedContent.message || parsedContent.keyword || parsedContent.name}"
+                      </p>
+
+                      {/* Contoh jika ada data file di dalam JSON content */}
+                      {/* {parsedContent.fileName && (
+                        <div className="mt-3 p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-lg border border-slate-100 dark:border-zinc-700 flex items-center gap-2 w-fit">
+                          <span className="text-lg">📄</span>
+                          <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">{parsedContent.fileName}</span>
+                        </div>
+                      )} */}
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-tight">
+                          {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: id })}
+                        </span>
+                        <span className="text-slate-300 dark:text-zinc-700">•</span>
+                        <span className="text-[11px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest">
+                          {item.type}
+                        </span>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{item.file.name}</span>
-                        <span className="text-[10px] text-gray-400 dark:text-zinc-500">{item.file.size}</span>
-                      </div>
+
+                      {/* Action Buttons berdasarkan Type */}
+                      {item.type === 'invite' && (
+                        <div className="flex gap-2 mt-4">
+                          <button className="px-5 py-2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all">
+                            Accept
+                          </button>
+                          <button className="px-5 py-2 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">
+                            Decline
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+          {loading && <div className="flex w-full justify-center">
+            <div className="w-8 h-8 rounded-full animate-spin border-3 border-gray-300 dark:border-gray-400 border-t-blue-600 dark:border-t-blue-600"></div>
+            </div>}
+          {hasMore && <div className="p-4 flex justify-center border-t border-slate-100 dark:border-zinc-800">
+            <button
+              onClick={fetchNotifications}
+              className="w-full py-3 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors"
+            >
+              Tampilkan Lebih Banyak
+            </button>
+          </div>}
         </div>
       </div>
     </div>

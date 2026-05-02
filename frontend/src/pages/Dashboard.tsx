@@ -2,6 +2,7 @@ import Chart from 'react-apexcharts';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 import useDashboard from '../hooks/dashboard';
+import { ChartSkeleton, MatricSkeleton, NotificationSkeleton, OverviewSkeleton } from '../components/DashboardSkeleton';
 
 
 
@@ -11,7 +12,12 @@ export default function Dashboard() {
         lineChartOptions,
         lineChartSeries,
         notifications,
-        statUser
+        statUser,
+        isLoadingStatMessage,
+        isLoadingStatUser,
+        isLoadingStats,
+        isLoadingNotifications,
+        user
     } = useDashboard();
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-2">
@@ -27,81 +33,89 @@ export default function Dashboard() {
             </div> */}
 
             {/* Row 1: Employee Overview */}
-            <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-6 flex flex-col">
-                <div className="flex justify-between items-start mb-8">
-                    <div>
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-100 tracking-tight">Employees</h3>
-                        <p className="text-xs text-slate-500">Headcount distribution</p>
-                    </div>
-                    {/* <select className="bg-slate-50 dark:bg-slate-800 text-[10px] font-medium py-1 px-2 rounded-lg border-none ring-1 ring-slate-200 dark:ring-slate-700 outline-none">
+            {isLoadingStatUser ?
+                <OverviewSkeleton /> :
+                <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-6 flex flex-col">
+                    <div className="flex justify-between items-start mb-8">
+                        <div>
+                            <h3 className="font-semibold text-slate-800 dark:text-slate-100 tracking-tight">Employees</h3>
+                            <p className="text-xs text-slate-500">Headcount distribution</p>
+                        </div>
+                        {/* <select className="bg-slate-50 dark:bg-slate-800 text-[10px] font-medium py-1 px-2 rounded-lg border-none ring-1 ring-slate-200 dark:ring-slate-700 outline-none">
                         <option>Aug 25 - Sept 25</option>
                     </select> */}
-                </div>
-                <div className="flex items-center justify-between flex-1 gap-4">
-                    <div className="md:block lg:flex gap-4 space-y-5">
-                        <StatItem label="Inactive" value={statUser?.inactive} color="bg-orange-400" />
-                        <StatItem label="Active" value={statUser?.active} color="bg-emerald-400" />
-                        <StatItem label="Total" value={statUser?.total} color="bg-slate-800 dark:bg-white" />
                     </div>
+                    <div className="flex items-center justify-between flex-1 gap-4">
+                        <div className="md:block lg:flex gap-4 space-y-5">
+                            <StatItem label="Inactive" value={statUser?.inactive} color="bg-orange-400" />
+                            <StatItem label="Active" value={statUser?.active} color="bg-emerald-400" />
+                            <StatItem label="Total" value={statUser?.total} color="bg-slate-800 dark:bg-white" />
+                        </div>
 
-                    {/* Enhanced Progress Circle */}
-                    <div className="relative flex items-center justify-center">
-                        <div className="w-36 h-36 border-[10px] border-slate-100 dark:border-slate-800 rounded-full"></div>
-                        <div className="absolute w-36 h-36 border-[10px] border-orange-500 border-t-transparent border-l-transparent rounded-full rotate-45"></div>
-                        <div className="absolute w-30 h-30 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden shadow-xl">
-                            <img src="https://i.pravatar.cc/150?u=emp" alt="emp" className="object-cover" />
+                        {/* Enhanced Progress Circle */}
+                        <div className="relative flex items-center justify-center">
+                            <div className="w-36 h-36 border-[10px] border-slate-100 dark:border-slate-800 rounded-full"></div>
+                            <div className="absolute w-36 h-36 border-[10px] border-orange-500 border-t-transparent border-l-transparent rounded-full rotate-45"></div>
+                            <div className="absolute w-30 h-30 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden shadow-xl">
+                                <img src={user?.profileUrl || "/default.png"} alt="emp" className="w-full h-full object-cover" />
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </div>}
 
             {/* Row 1: Mini Metrics */}
-            <div className="md:col-span-12 lg:col-span-4 flex flex-col gap-4">
-                {matricStat.map(s => (
-                    <MetricCard
-                        title={s.title}
-                        desc={s.des}
-                        sub={s.sub}
-                        color={s.id === 1 ? '' : s.id === 2 ? 'text-orange-500' : 'text-cyan-500'}
-                        icon="🎯"
-                    />
-                ))}
-            </div>
+            {isLoadingStats ?
+                <MatricSkeleton /> :
+                <div className="md:col-span-12 lg:col-span-4 flex flex-col gap-4">
+                    {matricStat.map(s => (
+                        <MetricCard
+                            title={s.title}
+                            desc={s.des}
+                            sub={s.sub}
+                            color={s.id === 1 ? '' : s.id === 2 ? 'text-orange-500' : 'text-cyan-500'}
+                            icon="🎯"
+                        />
+                    ))}
+                </div>}
 
             {/* Bottom Row: Messages Chart */}
-            <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                    <div>
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">Incoming Messages</h3>
-                        <p className="text-sm text-slate-500">Weekly engagement analytics</p>
+            {isLoadingStatMessage ?
+                <ChartSkeleton /> :
+                <div className="md:col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                        <div>
+                            <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">Incoming Messages</h3>
+                            <p className="text-sm text-slate-500">Weekly engagement analytics</p>
+                        </div>
+                        <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                            <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"></span> Messages
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-                        <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"></span> Messages
-                        </span>
+                    <div className="w-full">
+                        <Chart options={lineChartOptions} series={lineChartSeries} type="line" height={280} />
                     </div>
-                </div>
-                <div className="w-full">
-                    <Chart options={lineChartOptions} series={lineChartSeries} type="line" height={280} />
-                </div>
-            </div>
+                </div>}
 
             {/* Bottom Row: Notifications */}
-            <div className="md:col-span-12 lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8 lg:p-5">
-                <div className="flex justify-between items-center mb-8 lg:px-3">
-                    <h3 className="font-semibold text-slate-800 dark:text-slate-100">Notifications</h3>
-                    <button className="px-3 py-1 text-xs font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-colors">
-                        View All
-                    </button>
-                </div>
-                <div className="relative space-y-6 before:absolute before:left-[-10px] before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-100 dark:before:bg-slate-800">
-                    {notifications && notifications.map(notif => (
-                        <div key={notif.id}>
-                            <NotificationItem name={notif.user.name} action={notif.title} time={notif.createdAt} />
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {isLoadingNotifications ?
+                <NotificationSkeleton /> :
+                <div className="md:col-span-12 lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-[2rem] p-8 lg:p-5">
+                    <div className="flex justify-between items-center mb-8 lg:px-3">
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">Notifications</h3>
+                        <button className="px-3 py-1 text-xs font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-colors">
+                            View All
+                        </button>
+                    </div>
+                    <div className="relative space-y-6 before:absolute before:left-[-10px] before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-100 dark:before:bg-slate-800">
+                        {notifications && notifications.map(notif => (
+                            <div key={notif.id}>
+                                <NotificationItem profileUrl={notif.user.profileUrl} name={notif.user.name || notif.user.email} action={notif.title} time={notif.createdAt} />
+                            </div>
+                        ))}
+                    </div>
+                </div>}
         </div>
     )
 };
@@ -124,9 +138,9 @@ const MetricCard = ({ title, desc, sub, color = "text-gray-800 dark:text-white" 
     </div>
 );
 
-const NotificationItem = ({ name, action, time }: any) => (
+const NotificationItem = ({ profileUrl, name, action, time }: any) => (
     <div className="flex gap-3 items-start shadow-md border-1 border-gray-200 dark:border-none dark:shadow-none dark:bg-black/20 p-3 rounded-xl">
-        <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
+        <img src={profileUrl || "/default.png"} alt="profile" className="w-8 h-8 bg-gray-600 rounded-full flex-shrink-0 object-cover" />
         <div>
             <p className="text-xs"><strong>{name}</strong> {action}</p>
             <p className="text-[10px] text-gray-800 dark:text-gray-300 mt-1">{formatDistanceToNow(new Date(time), { addSuffix: true, locale: id })}</p>

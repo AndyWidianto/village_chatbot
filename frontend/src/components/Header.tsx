@@ -3,15 +3,15 @@ import {
     Menu, Sun, Moon,
     X,
     Settings,
-    CreditCard,
-    ShieldCheck,
     LogOut
 } from "lucide-react";
 import { useContext } from "react";
 import { ThemeContext } from "../ThemeProvider";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { Accordion } from "./Animate";
 import useHeaderHook from "../hooks/HeaderHook";
+import { formatDistanceToNow } from "date-fns";
+import { id } from "date-fns/locale";
 
 
 
@@ -34,7 +34,7 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
         setShowNotifications,
         notifications,
         showSearch,
-        setShowSearch, 
+        setShowSearch,
         isOpenProfile,
         setIsOpenProfile,
         refNotification,
@@ -118,50 +118,56 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
                             <button className="block" onClick={() => setShowNotifications(!showNotifications)}>
                                 <Bell className="text-gray-400 cursor-pointer" size={20} />
                             </button>
-                            {notifications.some(n => n.unread) && (
+                            {notifications && notifications.some(n => !n.isRead) && (
                                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                             )}
-                            {showNotifications && notifications.length > 0 && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#202C33] rounded-lg shadow-lg overflow-hidden">
+                            {showNotifications && notifications && notifications.length > 0 && (
+                                <div className="absolute right-0 mt-2 w-90 bg-white dark:bg-[#202C33] rounded-lg shadow-lg overflow-hidden">
                                     {notifications.map((item) => (
                                         <div
                                             key={item.id}
-                                            className={`px-4 py-3 transition-colors ${item.unread ? 'bg-gray-50/50 dark:bg-zinc-800/30' : 'bg-white dark:bg-zinc-900'}`}
+                                            className={`group relative px-5 py-4 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50 cursor-pointer border-b border-slate-100 dark:border-zinc-800 last:border-none ${!item.isRead ? 'bg-blue-50/30 dark:bg-blue-500/5' : 'bg-white dark:bg-zinc-900'
+                                                }`}
                                         >
-                                            <div className="flex gap-1">
-                                                <img
-                                                    src={item.avatar}
-                                                    alt={item.user}
-                                                    className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800"
-                                                />
+                                            {/* Unread Indicator Dot */}
+                                            {!item.isRead && (
+                                                <span className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                                            )}
 
-                                                <div className="flex-1">
-                                                    <div className="flex flex-wrap items-baseline gap-1">
-                                                        <span className="font-bold text-gray-900 dark:text-zinc-100">{item.user}</span>
-                                                        <span className="text-gray-500 dark:text-zinc-400 text-sm">{item.action}</span>
-                                                        {item.target && (
-                                                            <span className="font-bold text-gray-900 dark:text-zinc-100 text-sm">{item.target}</span>
-                                                        )}
+                                            <div className="flex gap-4">
+                                                {/* Profile Picture with Ring */}
+                                                <div className="relative shrink-0">
+                                                    <img
+                                                        src={item.user.profileUrl || "/default-avatar.png"}
+                                                        alt={item.user.name}
+                                                        className="w-11 h-11 rounded-full ring-2 ring-white dark:ring-zinc-800 shadow-sm object-cover"
+                                                    />
+                                                    {/* Small Action Icon Overlay (Optional) */}
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center shadow-sm border border-slate-100 dark:border-zinc-700">
+                                                        <span className="text-[10px]">💬</span>
                                                     </div>
+                                                </div>
 
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className="text-xs text-gray-400 dark:text-zinc-500">{item.time}</span>
-                                                        <span className="text-gray-300 dark:text-zinc-700">•</span>
-                                                        <span className="text-xs text-gray-400 dark:text-zinc-500">{item.category}</span>
-                                                    </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-400">
+                                                            <span className="font-semibold text-slate-900 dark:text-zinc-100 mr-1">
+                                                                {item.user.name}
+                                                            </span>
+                                                            {item.title}
+                                                        </p>
 
-                                                    {/* Conditional Rendering for File attachment */}
-                                                    {item.file && (
-                                                        <div className="mt-3 p-3 border border-gray-100 dark:border-zinc-800 rounded-lg flex items-center gap-3 bg-white dark:bg-zinc-900 shadow-sm w-fit pr-8">
-                                                            <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded">
-                                                                <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" className="w-4 h-4" alt="figma" />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{item.file.name}</span>
-                                                                <span className="text-[10px] text-gray-400 dark:text-zinc-500">{item.file.size}</span>
-                                                            </div>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                                                                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: id })}
+                                                            </span>
+
+                                                            {/* Interactive Action (Show on Hover) */}
+                                                            <button className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                                                Tandai dibaca
+                                                            </button>
                                                         </div>
-                                                    )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -175,7 +181,7 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
                                 onClick={() => setIsOpenProfile(!isOpenProfile)}
                                 className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-700"
                             >
-                                <img src={user?.profileUrl} alt="avatar" />
+                                <img src={user?.profileUrl || "/default.png"} alt="avatar" className="w-full h-full object-cover" />
                             </button>
                             {isOpenProfile && (
                                 <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl z-[99] overflow-hidden animate-in fade-in zoom-in duration-150">
@@ -188,20 +194,10 @@ export default function Header({ handleToggleSidebar, headerContent }: HeaderPro
 
                                     <div className="p-1.5">
                                         {/* Menu Items */}
-                                        <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors group">
+                                        <Link to="/dashboard/settings" className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors group">
                                             <Settings size={18} className="group-hover:text-primary transition-colors" />
                                             <span>Pengaturan Profil</span>
-                                        </button>
-
-                                        <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors group">
-                                            <CreditCard size={18} className="group-hover:text-primary transition-colors" />
-                                            <span>Billing & Plan</span>
-                                        </button>
-
-                                        <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors group">
-                                            <ShieldCheck size={18} className="group-hover:text-primary transition-colors" />
-                                            <span>Keamanan</span>
-                                        </button>
+                                        </Link>
                                     </div>
 
                                     {/* Logout Section */}

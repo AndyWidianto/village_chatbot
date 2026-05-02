@@ -42,16 +42,28 @@ export default function useSetting() {
             console.log(data);
             setDevices(data);
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Gagal mengambil data devices";
-            toast.error(errorMessage, {
-                duration: 4000,
-                position: 'top-right',
-                style: {
-                    borderRadius: '12px',
-                    background: '#1e293b',
-                    color: '#fff',
-                },
-            });
+            if (err.response?.status === 404) {
+                toast.error("Evolution API tidak aktif (404). Mengirim pesan peringatan...", {
+                    icon: '📡',
+                    style: {
+                        borderRadius: '12px',
+                        background: '#991b1b',
+                        color: '#fff',
+                    },
+                });
+
+            } else {
+                const errorMessage = err.response?.data?.message || "Gagal mengambil data devices";
+                toast.error(errorMessage, {
+                    duration: 4000,
+                    position: 'top-right',
+                    style: {
+                        borderRadius: '12px',
+                        background: '#1e293b',
+                        color: '#fff',
+                    },
+                });
+            }
 
             console.error("Fetch Error:", err);
         } finally {
