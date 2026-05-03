@@ -60,10 +60,9 @@ export class KnowledgeService {
         }
         const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms * 1000 * 60));
         const chunkData: { content: string; vector: string }[] = [];
-        const batchSize = 100; // Sesuai limit Gemini Free Tier
+        const batchSize = 90; // Sesuai limit Gemini Free Tier
 
         for (let i = 0; i < chunks.length; i += batchSize) {
-            // Ambil potongan 100 data
             const batch = chunks.slice(i, i + batchSize);
 
             console.log(`Memproses batch ${Math.floor(i / batchSize) + 1}...`);
