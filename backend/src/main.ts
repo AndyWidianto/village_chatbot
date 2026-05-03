@@ -7,7 +7,8 @@ async function bootstrap() {
   const whitelist = [
     'http://localhost:5173',
     process.env.BASE_URL_CLIENT,
-    'https://private-village-chatbot.vercel.app/',
+    'https://www.pelayanandesa.my.id',
+    'https://pelayanandesa.my.id',
   ];
   const app = await NestFactory.create(AppModule);
   app.use(CookieParser())
