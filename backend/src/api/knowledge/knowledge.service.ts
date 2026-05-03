@@ -58,10 +58,17 @@ export class KnowledgeService {
         if (rawText && rawText.trim()) {
             chunks = this.splitText(rawText, chunkSize, chunkOverlap);
         }
-        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms * 1000 * 60));
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms * 1000));
         const chunkData: { content: string; vector: string }[] = [];
-        const batchSize = 90; // Sesuai limit Gemini Free Tier
-
+        if (chunks.length > 95) {
+            throw new BadRequestException({
+                statusCode: 400,
+                message: 'Data terlalu besar, Mas! Maksimal 95 chunk sekali jalan biar server nggak meledak.',
+                error: 'Bad Request',
+                hint: 'Coba pecah dokumen Anda menjadi beberapa bagian kecil atau upload secara bertahap.'
+            });
+        }
+        const batchSize = 10;
         for (let i = 0; i < chunks.length; i += batchSize) {
             const batch = chunks.slice(i, i + batchSize);
 
@@ -78,7 +85,7 @@ export class KnowledgeService {
             chunkData.push(...results);
             if (i + batchSize < chunks.length) {
                 console.log("Limit batch tercapai. Menunggu 60 detik agar tidak 429...");
-                await delay(3);
+                await delay(2);
             }
         }
 
