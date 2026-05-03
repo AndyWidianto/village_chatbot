@@ -5,10 +5,9 @@ import CookieParser from "cookie-parser";
 
 async function bootstrap() {
   const whitelist = [
-    // 'http://localhost:5173',
-    // process.env.BASE_URL_CLIENT,
-    // 'https://private-village-chatbot.vercel.app',
-    "*"
+    'http://localhost:5173',
+    process.env.BASE_URL_CLIENT,
+    'https://private-village-chatbot.vercel.app/',
   ];
   const app = await NestFactory.create(AppModule);
   app.use(CookieParser())
