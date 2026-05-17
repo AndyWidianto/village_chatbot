@@ -23,10 +23,7 @@ export class ChatbotService {
 
         if (!autoreply) return { answer: "Layanan sedang non-aktif.", sources: [] };
 
-        let searchMessage = data.message;
-        if (data.message.length < 10) {
-            searchMessage = await this.ollama.reWrite(data.id, data.message);
-        }
+        let searchMessage = await this.ollama.reWrite(data.id, data.message);
 
         const userVector = await this.ollama.embeddingsGemini(searchMessage);
         const vectorString = `[${userVector.join(',')}]`;
@@ -37,8 +34,10 @@ export class ChatbotService {
         WHERE 1 - (embedding <=> ${vectorString}::vector) > 0.5
         ORDER BY similarity DESC
         LIMIT 3
-    `;
-
+        `;
+        console.log("Search Message:", searchMessage);
+        console.log("Context Chunks:", contextChunks);
+        console.log("Embedding Chunks:", vectorString);
         if (!contextChunks || contextChunks.length === 0) {
             return {
                 answer: "Mohon maaf, informasi tersebut belum tersedia di database pelayanan desa kami. Silakan hubungi kantor desa secara langsung.",

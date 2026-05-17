@@ -16,12 +16,14 @@ import Authorization from './Authorization'
 import CreateKnowledgePage from './pages/Knowledge/CreateKnowledge'
 import Home from './pages/Home'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
 
 export default function App() {
   const queryClient = new QueryClient();
   return (
     <ThemeProvider>
+      <Toaster position='top-right' />
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <Routes>

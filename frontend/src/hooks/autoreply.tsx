@@ -8,7 +8,6 @@ export default function useAutoreply() {
 
     const [autoreplies, setAutoreplies] = useState<Autoreply[]>([]);
     const [lastId, setLastId] = useState<string | null>(null);
-    const [oldLastId, setOldLastId] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [selected, setSelected] = useState<Autoreply | null>(null);
@@ -21,10 +20,11 @@ export default function useAutoreply() {
         replyContent: null,
         isActive: true,
     })
-    const itemsPerPage = 5;
+    const itemsPerPage = 7;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const [totalPages, setTotalPages] = useState(100);
+    const items = autoreplies.slice(indexOfFirstItem, indexOfLastItem);
 
     const handleDelete = async (id: string) => {
         if (window.confirm("Are you sure you want to delete this autoreply?")) {
@@ -82,17 +82,16 @@ export default function useAutoreply() {
         if (searchTerm.trim()) {
             query += `&search=${searchTerm}`;
         }
-        if (!lastId) {
-            setOldLastId([""]);
-        }
         setLoading(true);
 
         try {
-            const res = await axiosPrivate.get(`/autoreplies?limit=${20}${query}`);
+            if (itemsPerPage * currentPage < autoreplies.length) return;
+            const res = await axiosPrivate.get(`/autoreplies?limit=${itemsPerPage}${query}`);
             const data = res.data;
 
-            setAutoreplies(data.autoreplies);
+            setAutoreplies(prev => [...prev, ...data.autoreplies]);
             setTotalPages(data.totalPage);
+            setLastId(data.autoreplies.length > 0 ? data.autoreplies[data.autoreplies.length - 1].id : null); 
 
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data autoreply";
@@ -160,36 +159,25 @@ export default function useAutoreply() {
             setLoading(false);
         }
     };
-    const handleCurrent = () => {
-        if (lastId) {
-            setOldLastId([...oldLastId, lastId]);
-        }
+    const handleCurrent = async () => {
         setCurrentPage(currentPage + 1);
-        setLastId(autoreplies[autoreplies.length - 1].id);
-        console.log("lastId: ", lastId);
+        await fetchAutoreplies();
     }
     const handlePrev = () => {
-        if (oldLastId.length === 0) return;
-        const historyCopy = [...oldLastId];
-
-        const prevId = historyCopy.pop();
-
-        setLastId(prevId || null);
-        setOldLastId(historyCopy);
         setCurrentPage(currentPage - 1);
-        console.log(oldLastId)
     };
 
 
 
     useEffect(() => {
         fetchAutoreplies();
-    }, [lastId, searchTerm]);
+    }, [searchTerm]);
 
     return {
         handleUpdate,
         handleDelete,
         autoreplies,
+        items,
         totalPages,
         setSearchTerm,
         setCurrentPage,
@@ -206,6 +194,7 @@ export default function useAutoreply() {
         formData,
         loading,
         handleCurrent,
-        handlePrev
+        handlePrev,
+        itemsPerPage
     }
 }

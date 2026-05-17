@@ -60,9 +60,9 @@ export default function useDashboard() {
 
     const fetchNotifications = async () => {
         try {
-            const res = await axiosPrivate.get(`/notifications`);
+            const res = await axiosPrivate.get(`/notifications?limit=3`);
             const data: Notification[] = res.data;
-            console.log(data);
+            console.log("Fetched Notifications:", data);
             return data;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data notification";

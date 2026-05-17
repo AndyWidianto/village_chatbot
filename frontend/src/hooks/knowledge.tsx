@@ -12,17 +12,17 @@ export default function useKnowledge() {
     });
     const [knowledges, setKnowledges] = useState<Knowledge[]>([]);
     const [lastId, setLastId] = useState<string | null>(null);
-    const [oldLastId, setOldLastId] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [selected, setSelected] = useState<Knowledge | null>(null);
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [loadingUpdate, setLoadingUpdate] = useState(false);
-    const itemsPerPage = 5;
+    const itemsPerPage = 6;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const [totalPages, setTotalPages] = useState(100);
+    const items = knowledges.slice(indexOfFirstItem, indexOfLastItem);
 
     const handleDelete = async (id: string) => {
         if (window.confirm("Are you sure you want to delete this knowledge?")) {
@@ -74,18 +74,16 @@ export default function useKnowledge() {
         if (searchTerm.trim()) {
             query += `&search=${searchTerm}`;
         }
-        if (!lastId) {
-            setOldLastId([""]);
-        }
-
         setLoading(true);
 
         try {
-            const res = await axiosPrivate.get(`/knowledges?limit=${20}${query}`);
+            if (itemsPerPage * currentPage < knowledges.length) return;
+            const res = await axiosPrivate.get(`/knowledges?limit=${itemsPerPage}${query}`);
             const data = res.data;
 
-            setKnowledges(data.knowledges);
+            setKnowledges(prev => [...prev, ...data.knowledges]);
             setTotalPages(data.totalPage);
+            setLastId(data.knowledges.length > 0 ? data.knowledges[data.knowledges.length - 1].id : null);
 
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data knowledges";
@@ -154,31 +152,19 @@ export default function useKnowledge() {
         }
     };
 
-    const handleCurrent = () => {
-        if (lastId) {
-            setOldLastId([...oldLastId, lastId]);
-        }
-        setCurrentPage(currentPage + 1);
-        setLastId(knowledges[knowledges.length - 1].id);
-        console.log("lastId: ", lastId);
+    const handleCurrent = async () => {
+        setCurrentPage(prev => prev + 1);
+        await fetchKnowledges();
     }
     const handlePrev = () => {
-        if (oldLastId.length === 0) return;
-        const historyCopy = [...oldLastId];
-
-        const prevId = historyCopy.pop();
-
-        setLastId(prevId || null);
-        setOldLastId(historyCopy);
         setCurrentPage(currentPage - 1);
-        console.log(oldLastId)
     };
 
 
 
     useEffect(() => {
         fetchKnowledges();
-    }, [lastId, searchTerm]);
+    }, [searchTerm]);
 
     return {
         handleUpdate,
@@ -201,7 +187,8 @@ export default function useKnowledge() {
         loading,
         handleCurrent,
         handlePrev,
-        loadingUpdate
+        loadingUpdate,
+        items
     }
 
 }

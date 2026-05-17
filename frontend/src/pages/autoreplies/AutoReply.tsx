@@ -23,7 +23,9 @@ export default function AutoReply() {
     formData,
     loading,
     handleCurrent,
-    handlePrev
+    handlePrev,
+    itemsPerPage,
+    items
   } = useAutoreply();
 
   return (
@@ -90,10 +92,10 @@ export default function AutoReply() {
                     </TrSkeleton>
                   ))
                   :
-                  autoreplies.length > 0 ? (
-                    autoreplies.map((autoreply, idx) => (
+                  items.length > 0 ? (
+                    items.map((autoreply, idx) => (
                       <tr key={autoreply.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
-                        <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{idx + 1}</td>
+                        <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{(idx + 1 * itemsPerPage * currentPage) - itemsPerPage + 1}</td>
                         <td className="px-6 py-4 text-sm truncate max-w-100 font-medium text-gray-800 dark:text-gray-200">{autoreply.name}</td>
                         <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type}</td>
                         <td className="px-6 py-4 text-sm truncate max-w-100 text-gray-900 dark:text-gray-400">{autoreply.type === "keyword" ? autoreply.replyContent : autoreply.aiPrompt}</td>
@@ -156,7 +158,7 @@ export default function AutoReply() {
         {/* Pagination Control */}
         <div className="flex justify-between items-center dark:bg-[#111827] p-4 rounded-xl border border-gray-300 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Showing <span className="text-white font-medium">{indexOfFirstItem + 1}</span> to <span className="text-gray-900 dark:text-white font-medium">{Math.min(indexOfLastItem, autoreplies.length)}</span> of <span className="text-white font-medium">{autoreplies.length}</span> entries
+            Showing <span className="text-gray-900 dark:text-white font-medium">{indexOfFirstItem + 1}</span> to <span className="text-gray-900 dark:text-white font-medium">{Math.min(indexOfLastItem, autoreplies.length)}</span> of <span className="text-gray-900 dark:text-white font-medium">{autoreplies.length}</span> entries
           </p>
 
           <div className="flex gap-2">

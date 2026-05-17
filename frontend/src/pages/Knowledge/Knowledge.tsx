@@ -23,7 +23,8 @@ export default function Knowledge() {
     loading,
     selected,
     loadingUpdate,
-    updateKnowledge
+    updateKnowledge,
+    items,
   } = useKnowledge();
 
   return (
@@ -75,8 +76,8 @@ export default function Knowledge() {
                     </TrSkeleton>
                   ))
                   :
-                  knowledges.length > 0 ? (
-                    knowledges.map((knowledge) => (
+                  items.length > 0 ? (
+                    items.map((knowledge) => (
                       <tr key={knowledge.id} className="hover:bg-gray-300/40 hover:dark:bg-gray-800/40 transition-colors">
                         <td className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200">{knowledge.name}</td>
                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-400">{knowledge.content}</td>
