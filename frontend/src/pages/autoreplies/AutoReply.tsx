@@ -1,4 +1,4 @@
-import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter, Info, Tag, MessageSquare, ToggleLeft } from 'lucide-react';
+import { Search, Trash2, Edit3, ChevronLeft, ChevronRight, Filter, Tag, MessageSquare, ToggleLeft } from 'lucide-react';
 import useAutoreply from '../../hooks/autoreply';
 import MotionModal from '../../components/Motion';
 import FormModal from '../../components/FormModal';
@@ -108,7 +108,7 @@ export default function AutoReply() {
                         </td>
                         <td className="px-6 py-4 text-sm text-center">
                           <div className="flex justify-center gap-3">
-                            <div className="relative group">
+                            {/* <div className="relative group">
                               <button
                                 onClick={() => handleDelete(autoreply.id)}
                                 className="p-1.5 bg-green-600/10 text-green-400 rounded-md hover:bg-green-500 hover:text-white transition"
@@ -118,7 +118,7 @@ export default function AutoReply() {
                               <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                 View Details
                               </div>
-                            </div>
+                            </div> */}
                             <div className="relative group">
                               <button
                                 onClick={() => handleUpdate(autoreply)}

@@ -74,6 +74,7 @@ export default function Dashboard() {
                             sub={s.sub}
                             color={s.id === 1 ? '' : s.id === 2 ? 'text-orange-500' : 'text-cyan-500'}
                             icon="🎯"
+                            key={s.id}
                         />
                     ))}
                 </div>}

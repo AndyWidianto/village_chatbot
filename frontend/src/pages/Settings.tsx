@@ -45,7 +45,9 @@ const ProfileSettings = () => {
         handleChangeImage,
         handleUpload,
         laodingUpload,
-        showImage
+        showImage,
+        notifications,
+        isLoadingNotifications
     } = useSetting();
 
     const Role = () => {
@@ -309,22 +311,27 @@ const ProfileSettings = () => {
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Aktivitas</h3>
                             </div>
                             <div className="space-y-6">
-                                {[
-                                    { text: "Berhasil kirim 500 broadcast", time: "10:00 WIB • Today", color: "bg-emerald-500" },
-                                    { text: "Update keyword Auto Reply 'Info'", time: "14:00 WIB • Yesterday", color: "bg-indigo-500" },
-                                    { text: "Login terakhir", time: "08:30 WIB • 01 Apr 2026", color: "bg-slate-300" }
-                                ].map((item, idx) => (
-                                    <div key={idx} className="flex gap-4 group">
-                                        <div className="relative">
-                                            <div className={`w-3 h-3 rounded-full ${item.color} z-10 relative mt-1`}></div>
-                                            {idx !== 2 && <div className="absolute top-4 left-1.5 w-px h-full bg-slate-100 dark:bg-slate-700"></div>}
+                                {isLoadingNotifications ? (
+                                    <p className="text-slate-500 dark:text-slate-400">Loading...</p>
+                                ) : (
+                                    notifications && notifications.map((item, idx) => (
+                                        <div key={idx} className="flex gap-4 group">
+                                            <div className="relative">
+                                                <div className={`w-3 h-3 ${item.type === "success" ? 'bg-emerald-500' : item.type === "warning" ? 'bg-amber-500' : 'bg-red-500'} rounded-full z-10 relative mt-1`}></div>
+                                                {idx !== 2 && <div className="absolute top-4 left-1.5 w-px h-full bg-slate-100 dark:bg-slate-700"></div>}
+                                            </div>
+                                            <div className="-mt-1">
+                                                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-500 transition-colors cursor-default">{item.title}</p>
+                                                <p className="text-[11px] font-medium text-slate-400 mt-0.5">{new Date().toLocaleString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}</p>
+                                            </div>
                                         </div>
-                                        <div className="-mt-1">
-                                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-500 transition-colors cursor-default">{item.text}</p>
-                                            <p className="text-[11px] font-medium text-slate-400 mt-0.5">{item.time}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                                    )))}
                             </div>
                         </div>
                     </div>

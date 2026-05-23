@@ -43,7 +43,7 @@ export const TdStatusSkeleton = () => (
 export const TdActionSkeleton = () => (
   <td className="px-6 py-4">
     <div className="flex justify-center gap-3">
-      <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+      {/* <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded-md"></div> */}
       <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
       <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
     </div>

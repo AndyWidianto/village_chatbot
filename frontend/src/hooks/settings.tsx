@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react"
 import useAxios from "../lib/axios.service";
 import { toast } from "sonner";
-import type { Device } from "../lib/types";
+import type { Device, Notification } from "../lib/types";
 import { useAuthStore } from "../lib/store/authStore";
+import { useQuery } from "@tanstack/react-query";
 
 
 export default function useSetting() {
@@ -278,10 +279,36 @@ export default function useSetting() {
             setLoadingUpload(false);
         }
     }
+    const fetchNotifications = async () => {
+        try {
+            const res = await axiosPrivate.get(`/notifications?limit=3`);
+            const data: Notification[] = res.data;
+            console.log("Fetched Notifications:", data);
+            return data;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Gagal mengambil data notification";
+            toast.error(errorMessage, {
+                duration: 4000,
+                position: 'top-right',
+                style: {
+                    borderRadius: '12px',
+                    background: '#1e293b',
+                    color: '#fff',
+                },
+            });
+
+            console.error("Fetch Error:", err);
+        }
+    }
     const handleSelectDevice = (device: Device) => {
         setIsOpenQrCode(true);
         setSelectDevice(device);
     }
+    const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: fetchNotifications,
+        staleTime: 5 * 60 * 1000,
+    });
 
     useEffect(() => {
         if (user) {
@@ -324,6 +351,8 @@ export default function useSetting() {
         handleChangeImage,
         showImage,
         laodingUpload,
-        handleUpload
+        handleUpload,
+        notifications,
+        isLoadingNotifications
     }
 }

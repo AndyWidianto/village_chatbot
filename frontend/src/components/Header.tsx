@@ -84,7 +84,7 @@ export default function Header({ handleToggleSidebar, headerContent, logout }: H
                         </div>}
                     </div>
                     <div className="flex items-center gap-6">
-                        <div className="relative flex bg-gray-200 dark:bg-gray-800 p-1 rounded-xl w-64 shadow-inner">
+                        <div className="relative flex bg-gray-200 dark:bg-gray-800 p-1 rounded-xl w-32 md:w-64 shadow-inner">
 
                             {/* Slider Background (Bola/Kotak yang bergeser) */}
                             <div
@@ -99,7 +99,7 @@ export default function Header({ handleToggleSidebar, headerContent, logout }: H
                                     }`}
                             >
                                 <Sun size={18} />
-                                Light
+                                <span className="hidden md:inline">Light</span>
                             </button>
 
                             {/* Tombol Dark */}
@@ -109,7 +109,7 @@ export default function Header({ handleToggleSidebar, headerContent, logout }: H
                                     }`}
                             >
                                 <Moon size={18} />
-                                Dark
+                                <span className="hidden md:inline">Dark</span>
                             </button>
                         </div>
                         <button onClick={() => setShowSearch(!showSearch)} className="block text-gray-400 cursor-pointer">

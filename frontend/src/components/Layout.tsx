@@ -173,7 +173,7 @@ const handleLogout = async () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen p-6 bg-gray-100 dark:bg-background dark:text-white w-full h-full">
+    <div className="flex min-h-screen p-1 md:p-6 bg-gray-100 dark:bg-background dark:text-white w-full h-full">
       {/* Sidebar */}
       <Sidebar 
       openSidebar={openSidebar} 
@@ -184,14 +184,14 @@ const handleLogout = async () => {
       />
 
       {/* Main Content */}
-      <main className={`flex-1 min-w-0 md:pl-2 ${openSidebar ? 'lg:ml-55' : 'ml-0 lg:ml-55'} transition-all duration-300`}>
+      <main className={`flex-1 min-w-0 md:pl-2 pb-20 ${openSidebar ? 'lg:ml-55' : 'ml-0 lg:ml-55'} transition-all duration-300`}>
         <Header 
         handleToggleSidebar={toggleSidebar} 
         headerContent={headerContent} 
         logout={handleLogout}
         />
         <div className="mt-15"></div>
-        <div className="pl-4">
+        <div className="p-1 md:pl-4">
           <Outlet />
         </div>
         <button
