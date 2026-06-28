@@ -17,6 +17,9 @@ import CreateKnowledgePage from './pages/Knowledge/CreateKnowledge'
 import Home from './pages/Home'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import CitizenPage from './pages/citizen'
+import ComplaintPage from './pages/complaint'
+import SearchComplaintPage from './pages/SearchComplaint'
 
 
 export default function App() {
@@ -30,6 +33,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Authorization><Layout /></Authorization>}>
               <Route index element={<Dashboard />} />
+              <Route path="citizens" element={<CitizenPage />} />
+              <Route path="complaints" element={<ComplaintPage />} />
               <Route path="autoreply" element={<AutoReply />} />
               <Route path="autoreply/create" element={<CreateAutoReply />} />
               <Route path="broadcasts" element={<Broadcast />} />
@@ -43,6 +48,7 @@ export default function App() {
             </Route>
 
             <Route path="login" element={<LoginPage />} />
+            <Route path="complaint/search" element={<SearchComplaintPage />} />
 
             {/* Test Page */}
             <Route path="/test" element={<h2>Hallo</h2>} />

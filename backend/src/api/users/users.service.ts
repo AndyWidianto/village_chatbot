@@ -77,6 +77,25 @@ export class UsersService {
         };
     }
 
+    async create(id: string, data: CreateUser) {
+        const existing = await this.findOne(id);
+        if (!existing) {
+            throw new NotFoundException("User not found");
+        }
+        if (existing.role !== "super_admin") {
+            throw new BadRequestException("Anda tidak diizinkan untuk membuat user!");
+        }
+        const password = await bcrypt.hash(data.password, 10);
+        const dataToSave = {
+            ...data,
+            password: password
+        }
+        const newUser = await this.prisma.user.create({
+            data: dataToSave
+        });
+        return newUser;
+    }
+
     async uploadProfile(user: PayloadJWT, file: Express.Multer.File) {
         const existing = await this.findOne(user.id);
         const fileName = `${Date.now()}-${file.originalname}`;
@@ -94,7 +113,7 @@ export class UsersService {
             .getPublicUrl(fileName);
 
         if (existing.thumbnail) {
-            const {data, error} = await supabase.storage
+            const { data, error } = await supabase.storage
                 .from('profile_images')
                 .remove([existing.thumbnail])
             if (error) {
@@ -119,5 +138,21 @@ export class UsersService {
             }
         });
         return updateUser;
+    }
+
+    async delete(userId: string, id: string) {
+        const existing = await this.findOne(userId);
+        if (!existing) {
+            throw new NotFoundException("User not found");
+        }
+        if (existing.role !== "super_admin") {
+            throw new BadRequestException("Anda tidak diizinkan untuk membuat user!");
+        }
+        await this.prisma.user.delete({
+            where: {
+                id: id
+            }
+        })
+        return { message: "Delete user successfully" };
     }
 }

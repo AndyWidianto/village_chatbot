@@ -177,8 +177,6 @@ const ProfileSettings = () => {
                                 </button>
                             </div>
                         </div>
-
-                        {/* --- 3. WHATSAPP INSTANCES --- */}
                         <div className="bg-white dark:bg-[#1E293B] rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm transition-all hover:shadow-md">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-3">
@@ -206,7 +204,6 @@ const ProfileSettings = () => {
                                                 <h4 className="text-md font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                                     {device.name} <span className="text-slate-400 font-normal">({device.instanceName})</span>
                                                 </h4>
-                                                <code className="text-xs text-indigo-500 dark:text-indigo-400 font-mono font-bold">/webhooks/desa-01</code>
                                                 <div className="flex flex-wrap items-center gap-2 mt-2">
                                                     <span className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-200/50 dark:border-emerald-500/20">
                                                         <CheckCircle className="w-3.5 h-3.5" />

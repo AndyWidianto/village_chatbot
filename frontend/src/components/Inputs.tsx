@@ -7,6 +7,7 @@ interface InputProps {
     icon: LucideIcon;
     value: string;
     placeholder?: string;
+    disabled?: boolean;
     onChange?: (e: React.ChangeEvent<FormElement>) => void;
 }
 
@@ -25,14 +26,14 @@ export function Select({ title, value, children, onChange }: SelectProps) {
     )
 }
 
-export function Input({ icon, onChange, placeholder, title, value }: InputProps) {
+export function Input({ icon, onChange, placeholder, title, value, disabled }: InputProps) {
     const Icon = icon;
     return (
         <div className="space-y-1">
             <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">{title}</label>
             <div className="relative">
                 <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input defaultValue={value} onChange={onChange} placeholder={placeholder} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-600/20 text-sm" />
+                <input defaultValue={value} onChange={onChange} placeholder={placeholder} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-600/20 text-sm" disabled={disabled} />
             </div>
         </div>
     )

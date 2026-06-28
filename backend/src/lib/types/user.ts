@@ -4,7 +4,7 @@ export interface CreateUser {
     username: string;
     email: string;
     password: string;
-    role: UserRole
+    role: UserRole;
 }
 
 export interface ResetPassword {

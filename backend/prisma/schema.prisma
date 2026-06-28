@@ -41,15 +41,23 @@ model User {
   @@map("users")
 }
 
+
+enum StatusDevice {
+  CONNECTING
+  CONNECTED
+  DISCONNECTED
+}
 model Device {
   id           String  @id @default(uuid())
   name         String
   number       String?
-  instanceName String  @default("")
+  instanceName String  @unique
+  status       StatusDevice @default(CONNECTING)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([number, instanceName])
   @@map("devices")
 }
 
@@ -121,4 +129,62 @@ model Notification {
   @@map("notifications")
 }
 
+model Citizen {
+  id            String         @id @default(uuid())
+  nik           String?        @unique // Optional, can be filled during chatbot verification
+  fullName      String?        
+  platformId    String         @unique // Unique ID from platform (e.g., WhatsApp number "62812xxx" or Telegram ID)
+  platform      ChatPlatform
+  subDistrict   String?        // Neighborhood/ Hamlet / RT / RW info for mapping
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  complaints    Complaint[]
+
+  @@index([platformId]) // Index for fast lookup when chatbot receives a message
+}
+
+model Complaint {
+  id              String          @id @default(uuid())
+  ticketNumber    String          @unique // Auto-generated format, e.g., COMP-2026-0001
+  title           String          // Short summary of the complaint
+  description     String          @db.Text
+  category        ComplaintCategory
+  status          ComplaintStatus @default(PENDING)
+  attachmentUrl   String?         // Photo/file attachment link from chatbot
+  publicId        String?
+  officerNotes    String?         @db.Text // Response or notes from village officials
+  
+  citizenId       String
+  citizen         Citizen         @relation(fields: [citizenId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([ticketNumber])
+  @@index([status])
+}
+
+
+enum ChatPlatform {
+  WHATSAPP
+  TELEGRAM
+  WEB_CHAT
+}
+
+enum ComplaintCategory {
+  INFRASTRUCTURE  // Broken roads, broken street lights, bridges
+  ADMINISTRATION  // ID cards (KTP/KK) processing, cover letters
+  SECURITY        // Theft, neighborhood watch, conflicts
+  SOCIAL_ASSISTANCE // Social aid, BLT, house renovations
+  HEALTH          // Posyandu services, disease outbreaks
+  OTHERS
+}
+
+enum ComplaintStatus {
+  PENDING     // Newly submitted via chatbot
+  IN_PROGRESS // Being handled by village officials
+  RESOLVED    // Successfully resolved
+  REJECTED    // Invalid or spam report
+}
 

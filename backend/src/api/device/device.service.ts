@@ -57,20 +57,7 @@ export class DeviceService {
     const devices = await this.prisma.device.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    const instances = await this.evolution.getInstances();
-
-    const instanceMap = new Map(instances.map((i: any) => [i.id, i]));
-
-    return devices.map(device => {
-      const instance: any = instanceMap.get(device.id);
-
-      return {
-        ...device,
-        status: instance?.connectionStatus ?? 'disconnected',
-        instanceName: instance?.name ?? device.instanceName,
-        integration: instance?.integration ?? 'UNKNOWN'
-      };
-    });
+    return devices;
   }
 
   async getOne(id: string) {

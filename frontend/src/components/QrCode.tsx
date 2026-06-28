@@ -23,7 +23,6 @@ const QRCodeModal = ({ isOpen, onClose, deviceId }: QrCodeModalProps) => {
         try {
             const res = await axiosPrivate.post(`/devices/connection/${deviceId}`);
             const data = res.data;
-            console.log(data);
             setQrValue(data.code);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data devices";

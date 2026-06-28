@@ -4,6 +4,8 @@ export type * from "./knowledge";
 export type * from "./device";
 export type * from "./message";
 export type * from "./notification";
+export type * from "./citizen";
+export type * from "./complaint";
 
 
 

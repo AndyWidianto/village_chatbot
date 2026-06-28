@@ -9,6 +9,8 @@ import {
   CirclePlus,
   Sparkles,
   Bot,
+  Users,
+  Files,
 } from "lucide-react";
 import MotionModal from './Motion';
 import ChatModal from './ChatModal';
@@ -41,88 +43,77 @@ export default function Layout() {
     {
       id: 1,
       type: "single",
-      label: 'Dashboard',
-      description: 'Overview statistik dan aktivitas sistem',
+      label: 'Dasbor',
+      description: 'Ringkasan statistik dan aktivitas sistem',
       icon: <LayoutDashboard size={20} />,
       path: '/dashboard'
     },
-
+    {
+      id: 21213,
+      type: "single",
+      label: 'Warga',
+      description: 'Mengelola warga',
+      icon: <Users size={20} />,
+      path: '/dashboard/citizens'
+    },
+    {
+      id: 3242,
+      type: "single",
+      label: 'Pengajuan',
+      description: 'Mengelola Pengajuan',
+      icon: <Files size={20} />,
+      path: '/dashboard/complaints'
+    },
     {
       id: 2,
       type: "group",
       active: false,
-      label: 'Auto Replies',
+      label: 'Balasan Otomatis',
       description: 'Kelola balasan otomatis berdasarkan pesan masuk',
       subMenu: [
         {
           id: 21,
-          label: 'AutoReply',
+          label: 'Balasan Otomatis',
           description: 'Daftar aturan balasan otomatis',
           icon: <CheckSquare size={20} />,
           path: '/dashboard/autoreply'
         },
         {
           id: 22,
-          label: 'Create AutoReply',
+          label: 'Buat Balasan Otomatis',
           description: 'Buat aturan balasan otomatis baru',
           icon: <CirclePlus size={20} />,
           path: '/dashboard/autoreply/create'
         },
       ]
     },
-
-    // {
-    //   id: 3,
-    //   type: "group",
-    //   active: false,
-    //   label: 'Broadcasts',
-    //   description: 'Kirim pesan massal ke banyak pengguna',
-    //   subMenu: [
-    //     {
-    //       id: 31,
-    //       label: 'Broadcasts',
-    //       description: 'Daftar pesan broadcast',
-    //       icon: <ClipboardList size={20} />,
-    //       path: '/dashboard/broadcasts'
-    //     },
-    //     {
-    //       id: 32,
-    //       label: 'Create Broadcast',
-    //       description: 'Buat dan kirim pesan broadcast baru',
-    //       icon: <CirclePlus size={20} />,
-    //       path: '/dashboard/broadcasts/create'
-    //     },
-    //   ]
-    // },
-
     {
       id: 4,
       type: "group",
       active: false,
-      label: 'Knowledge Base',
+      label: 'Basis Pengetahuan',
       description: 'Kelola data pengetahuan untuk chatbot AI',
       subMenu: [
         {
           id: 41,
-          label: 'Knowledge Base',
+          label: 'Basis Pengetahuan',
           description: 'Daftar artikel pengetahuan',
           icon: <CalendarCheck size={20} />,
           path: '/dashboard/knowledge-base'
         },
         {
           id: 42,
-          label: 'Create Knowledge Article',
+          label: 'Buat Artikel Pengetahuan',
           description: 'Tambah artikel pengetahuan baru',
           icon: <CirclePlus size={20} />,
           path: '/dashboard/knowledge-base/create'
         },
       ]
     },
-
     {
       id: 8,
       type: "single",
-      label: 'Settings',
+      label: 'Pengaturan',
       description: 'Pengaturan sistem dan preferensi pengguna',
       icon: <Settings size={20} />,
       path: '/dashboard/settings'
@@ -142,25 +133,25 @@ export default function Layout() {
     const id = crypto.randomUUID();
     setSessionId(id);
   };
-const handleLogout = async () => {
-  if (!confirm("Apakah anda yakin ingin logout?")) return;
+  const handleLogout = async () => {
+    if (!confirm("Apakah anda yakin ingin logout?")) return;
     try {
-        await axiosPrivate.post("/logout");
-        localStorage.removeItem("accessToken"); 
-        navigate("/login");
-        toast.success("Berhasil logout", {
-            style: {
-                borderRadius: '12px',
-                background: '#1e293b',
-                color: '#fff',
-            },
-        });
-        logout();
+      await axiosPrivate.post("/logout");
+      localStorage.removeItem("accessToken");
+      navigate("/login");
+      toast.success("Berhasil logout", {
+        style: {
+          borderRadius: '12px',
+          background: '#1e293b',
+          color: '#fff',
+        },
+      });
+      logout();
     } catch (err: any) {
-        console.error("Logout Error:", err);
-        navigate("/login");
+      console.error("Logout Error:", err);
+      navigate("/login");
     }
-};
+  };
   useEffect(() => {
     setRandomId();
     // socket.on("connect", () => {
@@ -175,20 +166,20 @@ const handleLogout = async () => {
   return (
     <div className="flex min-h-screen p-1 md:p-6 bg-gray-100 dark:bg-background dark:text-white w-full h-full">
       {/* Sidebar */}
-      <Sidebar 
-      openSidebar={openSidebar} 
-      sidebars={sidebars} 
-      handleToggleSidebar={toggleSidebar} 
-      handleHeaderContent={setHeaderContent} 
-      logout={handleLogout}
+      <Sidebar
+        openSidebar={openSidebar}
+        sidebars={sidebars}
+        handleToggleSidebar={toggleSidebar}
+        handleHeaderContent={setHeaderContent}
+        logout={handleLogout}
       />
 
       {/* Main Content */}
       <main className={`flex-1 min-w-0 md:pl-2 pb-20 ${openSidebar ? 'lg:ml-55' : 'ml-0 lg:ml-55'} transition-all duration-300`}>
-        <Header 
-        handleToggleSidebar={toggleSidebar} 
-        headerContent={headerContent} 
-        logout={handleLogout}
+        <Header
+          handleToggleSidebar={toggleSidebar}
+          headerContent={headerContent}
+          logout={handleLogout}
         />
         <div className="mt-15"></div>
         <div className="p-1 md:pl-4">

@@ -6,7 +6,7 @@ import { UsersController } from "./users.controller";
 
 
 @Module({
-    providers: [AccessTokenStrategy, UsersService],
+    providers: [UsersService, AccessTokenStrategy],
     controllers: [UsersController]
 })
 export class UsersModule {}

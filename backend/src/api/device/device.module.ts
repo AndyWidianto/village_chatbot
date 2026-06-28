@@ -8,7 +8,7 @@ import { AccessTokenStrategy } from "../../lib/guards/access.strategy";
 
 
 @Module({
-  providers: [PrismaService, DeviceService, AccessTokenStrategy],
+  providers: [PrismaService, DeviceService],
   controllers: [DeviceController],
   imports: [EvolutionModule]
 })

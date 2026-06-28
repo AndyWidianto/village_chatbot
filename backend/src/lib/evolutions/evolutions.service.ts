@@ -50,8 +50,7 @@ export class EvolutionService {
                         "MESSAGES_UPDATE",
                         "CONNECTION_UPDATE"
                     ],
-                    webhook_by_events: true,
-                    webhook_base64: true
+                    base64: true
                 }
             }
             );
