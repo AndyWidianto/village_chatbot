@@ -7,9 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "postinstall": "prisma generate",
-    "build": "prisma generate && npm run migrate:deploy && npm run seed:all && nest build",
+    "build": "prisma generate && npm run migrate:deploy && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "seed:all": "tsx seeders/index.ts",
+    "seed:user": "tsx seeders/user.ts",
     "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "migrate:dev": "npx prisma migrate dev",
