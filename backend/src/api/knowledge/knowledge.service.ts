@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { Prisma } from "@prisma/client";
 import { OllamaService } from "../../lib/agent/ollama.service";
 import { TypeNotification } from "../../lib/shared/notification";
+import { GeminiService } from "@/lib/agent/gemini.service";
 
 const pdf = require('pdf-parse-fork');
 
@@ -14,7 +15,8 @@ const pdf = require('pdf-parse-fork');
 export class KnowledgeService {
     constructor(
         private prisma: PrismaService,
-        private ollama: OllamaService
+        private ollama: OllamaService,
+        private gemini: GeminiService
     ) { }
 
     async createKnowledge(user: PayloadJWT, data: CreateKnowledgeAI) {
@@ -67,7 +69,7 @@ export class KnowledgeService {
             console.log(`Memproses batch ${Math.floor(i / batchSize) + 1}...`);
 
             const results = await Promise.all(batch.map(async (chunk) => {
-                const vector = await this.ollama.embeddings(chunk);
+                const vector = await this.gemini.embeddingsGemini(chunk);
                 return {
                     content: chunk,
                     vector: `[${vector.join(',')}]`

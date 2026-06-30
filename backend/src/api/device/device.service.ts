@@ -20,6 +20,7 @@ export class DeviceService {
     const newDevice = await this.prisma.device.create({
       data: { id: instance.instance.instanceId, name, instanceName }
     });
+    
     await this.setWebhook(instanceName, `api/webhook/${newDevice.id}`);
     await this.prisma.notification.create({
       data: {
@@ -30,12 +31,7 @@ export class DeviceService {
         userId: user.id
       }
     });
-    return {
-      ...newDevice,
-      status: instance?.connectionStatus ?? 'disconnected',
-      instanceName: instance?.name ?? newDevice.instanceName,
-      integration: instance?.integration ?? 'UNKNOWN'
-    };
+    return newDevice;
   }
 
   async setWebhook(instanceName: string, url: string) {
