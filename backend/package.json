@@ -12,6 +12,7 @@
     "seed:all": "tsx seeders/index.ts",
     "seed:user": "tsx seeders/user.ts",
     "seed:autoreply": "tsx seeders/autoreply.ts",
+    "seed:complaint": "tsx seeders/complaint.ts",
     "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "migrate:dev": "npx prisma migrate dev",

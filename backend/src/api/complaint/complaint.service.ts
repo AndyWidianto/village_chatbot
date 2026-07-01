@@ -3,7 +3,7 @@ import { CreateCompalintDto, UpdateComplaintDto } from "@/lib/dto/complaint.dto"
 import { PrismaService } from "@/lib/prisma/prisma.service";
 import { PayloadJWT } from "@/lib/types";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, ComplaintCategory, ComplaintStatus } from "@prisma/client";
 
 
 @Injectable()
@@ -143,7 +143,7 @@ export class ComplaintService {
         return complaint;
     }
 
-    async getComplaints(search?: string, limitStr?: string, lastId?: string, order?: "asc" | "desc") {
+    async getComplaints(search?: string, limitStr?: string, lastId?: string, order?: "asc" | "desc", status?: ComplaintStatus, category?: ComplaintCategory) {
         const limit = limitStr ? Number(limitStr) : 10;
         let query: Prisma.ComplaintFindManyArgs = {
             where: {
@@ -154,7 +154,9 @@ export class ComplaintService {
                         { ticketNumber: { contains: search, mode: "insensitive" } },
                         { title: { contains: search, mode: "insensitive" } } // Tambahan: Biasanya judul juga ikut dicari
                     ]
-                } : {})
+                } : {}),
+                ...status ? { status: status } : {},
+                ...category ? { category: category } : {}
             },
             ...(lastId ? {
                 cursor: {

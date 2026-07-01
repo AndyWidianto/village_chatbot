@@ -4,6 +4,7 @@ import type { RequestAndPayload } from "@/lib/types";
 import { AuthGuard } from "@nestjs/passport";
 import { UpdateComplaintDto } from "@/lib/dto/complaint.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ComplaintCategory, ComplaintStatus } from "@prisma/client";
 
 
 @Controller("api/complaints")
@@ -17,8 +18,8 @@ export class ComplaintController {
         return await this.service.getAll(query.search, query.lastId, query.limit);
     }
     @Get("/search")
-    async getComplaints(@Query() query: { search?: string, lastId?: string, limit?: string, order?: "asc" | "desc" }) {
-        return await this.service.getComplaints(query.search, query.limit, query.lastId, query.order);
+    async getComplaints(@Query() query: { search?: string, lastId?: string, limit?: string, order?: "asc" | "desc", status?: ComplaintStatus, category?: ComplaintCategory }) {
+        return await this.service.getComplaints(query.search, query.limit, query.lastId, query.order, query.status, query.category);
     }
 
     @Patch(":id")

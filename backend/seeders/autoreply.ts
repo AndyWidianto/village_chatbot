@@ -4,6 +4,33 @@ import { PrismaClient } from "@prisma/client";
 
 const autoRepliesSeed = [
     {
+        id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        name: "Sapaan - Assalamualaikum",
+        isActive: true,
+        type: "keyword",
+        triggerKeyword: "assalamualaikum",
+        replyContent: "Waalaikumussalam Wr. Wb. Selamat datang di pusat pelayanan digital Desa Gembongdadi. Ada yang bisa kami bantu hari ini? 😊\n\nSilakan ketik *menu* untuk menampilkan daftar layanan utama kami.",
+        aiPrompt: null
+    },
+    {
+        id: "6ba7b810-9dad-11d1-80b4-00c04fd430d1",
+        name: "Sapaan - Halo / Hallo",
+        isActive: true,
+        type: "keyword",
+        triggerKeyword: "halo", // Di backend, Anda bisa melakukan lowercase & match untuk "hallo" juga
+        replyContent: "Halo juga! Selamat datang di layanan WhatsApp pintar Desa Gembongdadi. Ada yang bisa saya bantu? \n\nKetik *menu* untuk melihat opsi layanan administrasi, atau langsung ketik pertanyaan Anda di sini.",
+        aiPrompt: null
+    },
+    {
+        id: "6ba7b810-9dad-11d1-80b4-00c04fd430d2",
+        name: "Sapaan Singkat - P",
+        isActive: true,
+        type: "keyword",
+        triggerKeyword: "p", // Mengakomodasi kebiasaan chat warga lokal
+        replyContent: "Halo! Selamat datang di Chatbot Desa Gembongdadi. Silakan ketik *menu* untuk melihat daftar layanan administrasi dan informasi desa yang tersedia. Terima kasih! 🙏",
+        aiPrompt: null
+    },
+    {
         id: "6ba7b810-9dad-11d1-80b4-00c04fd430c1",
         name: "Menu Utama & Salam",
         isActive: true,

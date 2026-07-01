@@ -8,8 +8,8 @@ async function bootstrap() {
   const whitelist = [
     'http://localhost:5173',
     process.env.BASE_URL_CLIENT,
-    'https://www.pelayanandesa.my.id',
-    'https://pelayanandesa.my.id',
+    'https://www.gembongdadi.web.id',
+    'https://gembongdadi.web.id',
   ];
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
