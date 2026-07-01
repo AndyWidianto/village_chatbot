@@ -1,12 +1,15 @@
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { PrismaService } from "../../lib/prisma/prisma.service";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
+import type { Cache } from "cache-manager";
 
 
 @Injectable()
 export class NotificationService {
     constructor(
-        private prisma: PrismaService
+        private prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) {}
 
     async getAll(userId: string, lastId?: string, limitStr?: string) {
@@ -39,9 +42,15 @@ export class NotificationService {
                 }
             }
         }
-        return this.prisma.notification.findMany({
+        const existingCache = await this.cacheManager.get(`notification:lastId:${lastId || "first"}:limit:${limit}`);
+        if (existingCache) {
+            return existingCache;
+        }
+        const notifications = await this.prisma.notification.findMany({
             ...query
         });
+        await this.cacheManager.set(`notification:lastId:${lastId || "first"}:limit:${limit}`, notifications, 10 * 60 * 1000);
+        return notifications;
     }
 
     async countUnread(userId: string) {

@@ -1,12 +1,18 @@
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { PrismaService } from "../../lib/prisma/prisma.service";
 import { TypeNotification } from "../../lib/shared/notification";
 import { CreateAutoreplies, PayloadJWT, UpdateAutoreplies } from "../../lib/types";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import type { Cache } from "cache-manager";
+import { Autoreply } from "@prisma/client";
 
 
 @Injectable()
 export class AutoreplyService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
+    ) { }
 
     async create(user: PayloadJWT, data: CreateAutoreplies) {
         if (data.type === "ai_rag" && !data.aiPrompt) {
@@ -23,6 +29,13 @@ export class AutoreplyService {
         const newAuto = await this.prisma.autoreply.create({
             data: { ...data }
         });
+        if (newAuto.type === "ai_rag") {
+            const existing = await this.cacheManager.get<Autoreply[]>(`autoreply:ai_rag`);
+            if (existing) {
+                const updated = [...existing, newAuto];
+                await this.cacheManager.set(`autoreply:ai_rag`, updated, 10 * 60 * 1000);
+            }
+        }
         await this.prisma.notification.create({
             data: {
                 title: 'create autoreply',
@@ -48,7 +61,14 @@ export class AutoreplyService {
         const updateAutoreply = await this.prisma.autoreply.update({
             where: { id },
             data: { ...data }
-        })
+        });
+        if (updateAutoreply.type === "ai_rag") {
+            const existing = await this.cacheManager.get<Autoreply[]>(`autoreply:ai_rag`);
+            if (existing) {
+                const updated = existing.map(a => a.id === updateAutoreply.id ? updateAutoreply : a);
+                await this.cacheManager.set(`autoreply:ai_rag`, updated, 10 * 60 * 1000);
+            }
+        }
         await this.prisma.notification.create({
             data: {
                 title: `update autoreply`,
@@ -100,20 +120,24 @@ export class AutoreplyService {
                 ]
             };
         }
-
+        const existingCache = await this.cacheManager.get<Autoreply[]>(`autoreply:lastId:${lastId || "first"}:limit:${limit}:search:${search || "none"}`);
+        if (existingCache) {
+            return existingCache;
+        }
         const [autoreplies, totalAutoreply] = await this.prisma.$transaction([
             this.prisma.autoreply.findMany(query),
             this.prisma.autoreply.count()
         ]);
         const totalPage = Math.ceil(totalAutoreply / limit);
         const nextCursor = autoreplies.length === limit ? autoreplies[autoreplies.length - 1].id : null;
-
-        return {
+        const sendData = {
             autoreplies,
             totalPage,
             nextCursor,
             totalData: totalAutoreply
-        };
+        }
+        await this.cacheManager.set(`autoreply:lastId:${lastId || "first"}:limit:${limit}:search:${search || "none"}`, sendData, 10 * 60 * 1000);
+        return sendData;
     }
     async getOne(id: string) {
         const existing = await this.prisma.autoreply.findUnique({
@@ -129,6 +153,19 @@ export class AutoreplyService {
             throw new BadRequestException("Akses ditolak. Role Review hanya diperbolehkan melihat data.")
         }
         const existing = await this.getOne(id);
+        if (existing.type === "ai_rag") {
+            const existingCache = await this.cacheManager.get<Autoreply[]>(`autoreply:ai_rag`);
+            if (existingCache) {
+                const updated = existingCache.filter(a => a.id !== existing.id);
+                await this.cacheManager.set(`autoreply:ai_rag`, updated, 10 * 60 * 1000);
+            }
+        }
+        if (existing.type === "keyword") {
+            const existingCache = await this.cacheManager.get<Autoreply>(`autoreply:${existing.name}`);
+            if (existingCache) {
+                await this.cacheManager.del(`autoreply:${existing.name}`);
+            }
+        }
         await this.prisma.autoreply.delete({
             where: { id: existing.id }
         })

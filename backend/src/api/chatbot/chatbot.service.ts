@@ -1,8 +1,11 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, Inject } from "@nestjs/common";
 import { PrismaService } from "../../lib/prisma/prisma.service";
 import { OllamaService } from "../../lib/agent/ollama.service";
 import { GeminiService } from "@/lib/agent/gemini.service";
 import { CACHE_RAM_HISTORY_CHAT } from "@/lib/constant/constant-chats";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import type { Cache } from "cache-manager";
+import { Autoreply } from "@prisma/client";
 
 
 
@@ -16,14 +19,22 @@ export class ChatbotService {
     constructor(
         private prisma: PrismaService,
         private ollama: OllamaService,
-        private gemini: GeminiService
+        private gemini: GeminiService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     async chatbot(data: { id: string, message: string }) {
         const findHistory = CACHE_RAM_HISTORY_CHAT[data.id];
-        const autoreply = await this.prisma.autoreply.findMany({
-            where: { type: "ai_rag", isActive: true }
-        });
+        let rulesAI = await this.cacheManager.get<Autoreply[]>(`autoreply:ai_rag`);
+        if (!rulesAI) {
+            const existing = await this.prisma.autoreply.findMany({
+                where: { type: "ai_rag", isActive: true }
+            });
+            if (existing.length > 0) {
+                rulesAI = existing;
+                await this.cacheManager.set(`autoreply:ai_rag`, rulesAI, 4 * 60 * 60 * 1000);
+            }
+        }
 
         let searchMessage = await this.gemini.reWrite(data.id, data.message);
         const userVector = await this.gemini.embeddingsGemini(searchMessage);
@@ -38,7 +49,7 @@ export class ChatbotService {
         `;
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const systemRules = `
-        ${autoreply.join("\n") || "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
+        ${rulesAI && rulesAI?.length > 0 ? rulesAI.map(a => a.replyContent).join("\n") : "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
 
         ====================================================
         KONTEKS

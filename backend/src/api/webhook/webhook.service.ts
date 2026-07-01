@@ -1,7 +1,7 @@
 import { EvolutionService } from "../../lib/evolutions/evolutions.service";
 import { PrismaService } from "../../lib/prisma/prisma.service";
 import { EvolutionWebhookPayload, ResultComplaint } from "../../lib/types";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ChatbotService } from "../chatbot/chatbot.service";
 import { MessageService } from "../message/message.service";
 import { StatusMessage } from "../../lib/shared/message";
@@ -9,7 +9,9 @@ import { CitizenService } from "../citizen/citizen.service";
 import { ComplaintService } from "../complaint/complaint.service";
 import { CACHE_RAM_HISTORY_CHAT } from "@/lib/constant/constant-chats";
 import { ConfigService } from "@nestjs/config";
-import { StatusDevice } from "@prisma/client";
+import { Autoreply, StatusDevice } from "@prisma/client";
+import type { Cache } from "cache-manager";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
 
 
 
@@ -24,7 +26,8 @@ export class WebhookService {
         private messageService: MessageService,
         private citizenService: CitizenService,
         private complaintService: ComplaintService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) {
         this.baseUrlFrontend = configService.get<string>("BASE_URL_FRONTEND")!;
     }
@@ -38,7 +41,7 @@ export class WebhookService {
                     body.data.message.imageMessage?.caption ||
                     body.data.message.documentMessage?.caption ||
                     body.data.message.extendedTextMessage?.text
-                    "";
+                "";
                 const base64 = body.data.base64
                 const remoteJid = body.data.key.remoteJid;
                 const instanceName = body.instance;
@@ -86,16 +89,23 @@ export class WebhookService {
     }
 
     async messageUpsert(instaceName: string, remoteJid: string, message: string, pushName: string, base64?: string) {
-        const existing = await this.prisma.autoreply.findFirst({
-            where: {
-                name: {
-                    contains: message,
-                    mode: "insensitive"
-                },
-                type: "keyword",
-                isActive: true
+        let autoreply: Autoreply | undefined = await this.cacheManager.get<Autoreply>(`autoreply:${message}`);
+        if (!autoreply) {
+            const existing = await this.prisma.autoreply.findFirst({
+                where: {
+                    name: {
+                        contains: message,
+                        mode: "insensitive"
+                    },
+                    type: "keyword",
+                    isActive: true
+                }
+            });
+            if (existing) {
+                await this.cacheManager.set(`autoreply:${message}`, existing, 10 * 60 * 1000);
+                autoreply = existing;
             }
-        });
+        }
         const number = remoteJid.split("@")[0];
         let historyChat = CACHE_RAM_HISTORY_CHAT[number];
         if (!historyChat) {
@@ -134,11 +144,11 @@ export class WebhookService {
             }
             CACHE_RAM_HISTORY_CHAT[number] = historyChat;
         }
-        if (existing) {
-            await this.evolution.sendTextMessage(instaceName, number, existing.replyContent || "");
+        if (autoreply) {
+            await this.evolution.sendTextMessage(instaceName, number, autoreply.replyContent || "");
             historyChat.chat.push(...[
                 { role: "user", content: message },
-                { role: "system", content: existing.replyContent || "" }
+                { role: "system", content: autoreply.replyContent || "" }
             ]);
         } else {
             const chatbot = await this.chatbotService.chatbot({ id: number, message: message });
