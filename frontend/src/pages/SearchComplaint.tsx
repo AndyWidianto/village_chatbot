@@ -14,8 +14,7 @@ interface Filters {
 }
 interface FilterBarProps {
     filters: Filters;
-    // Mengubah parameter menjadi fungsi penentu partial state (opsional, agar lebih fleksibel)
-    setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+    onChange: (name: "status" | "category" | "sort", value: string) => void;
 }
 
 const truncateText = (text: string, maxLength: number = 150) => {
@@ -107,19 +106,19 @@ const SearchBar = ({ onSearch }: { onSearch: (val: string) => void }) => {
     );
 };
 
-const FilterBar = ({ filters, setFilters }: FilterBarProps) => {
+const FilterBar = ({ filters, onChange }: FilterBarProps) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white dark:bg-[#111827] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Filter size={14} /> Status</label>
                 <select
                     value={filters.status}
-                    onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value as Filters["status"] }))}
+                    onChange={(e) => onChange("status", e.target.value)}
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-lg py-2 px-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                     <option value="ALL">Semua Status</option>
-                    <option value="OPEN">Menunggu</option>
-                    <option value="PROCESS">Diproses</option>
+                    <option value="PENDING">Menunggu</option>
+                    <option value="IN_PROGRESS">Diproses</option>
                     <option value="RESOLVED">Selesai</option>
                     <option value="REJECTED">Ditolak</option>
                 </select>
@@ -128,7 +127,7 @@ const FilterBar = ({ filters, setFilters }: FilterBarProps) => {
                 <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1"><AlertCircle size={14} /> Kategori</label>
                 <select
                     value={filters.category}
-                    onChange={(e) => setFilters((p) => ({ ...p, category: e.target.value as Filters["category"] }))}
+                    onChange={(e) => onChange("category", e.target.value)}
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-lg py-2 px-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                     <option value="ALL">Semua Kategori</option>
@@ -144,7 +143,7 @@ const FilterBar = ({ filters, setFilters }: FilterBarProps) => {
                 <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Calendar size={14} /> Urutkan</label>
                 <select
                     value={filters.sort}
-                    onChange={(e) => setFilters((p: any) => ({ ...p, sort: e.target.value }))}
+                    onChange={(e) => onChange("sort", e.target.value)}
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-lg py-2 px-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                     <option value="DESC">Terbaru</option>
@@ -270,6 +269,7 @@ export default function SearchComplaintPage() {
     const [filters, setFilters] = useState<Filters>({ status: "ALL", category: "ALL", sort: "DESC" });
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const items = complaints.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleFetchComplaints = async () => {
         setLoading(true);
@@ -300,9 +300,22 @@ export default function SearchComplaintPage() {
         setSearchTerm(val);
         setCurrentPage(1);
     }, []);
+    const handleFilterChange = (name: "status" | "category" | "sort", value: string) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+        setComplaints([]);
+        setNextId(null);
+        setCurrentPage(1);
+    }
+    const handleNextPage = (n: number) => {
+        if (n < 1 || n > Math.ceil(totalData / itemsPerPage)) return;
+        setCurrentPage(n);
+        if (nextId) {
+            handleFetchComplaints();
+        }
+    }
     useEffect(() => {
         handleFetchComplaints();
-    }, [currentPage, filters, searchTerm])
+    }, [filters, searchTerm])
     const totalPages = Math.ceil(totalData / itemsPerPage);
 
     return (
@@ -320,7 +333,7 @@ export default function SearchComplaintPage() {
                 {/* Toolbar: Search & Filter */}
                 <div className="space-y-4">
                     <SearchBar onSearch={handleSearch} />
-                    <FilterBar filters={filters} setFilters={setFilters} />
+                    <FilterBar filters={filters} onChange={handleFilterChange} />
                 </div>
 
                 {/* Results Section */}
@@ -333,9 +346,9 @@ export default function SearchComplaintPage() {
 
                     {loading ? (
                         <LoadingSkeleton />
-                    ) : complaints.length > 0 ? (
+                    ) : items.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {complaints.map((complaint) => (
+                            {items.map((complaint) => (
                                 <ComplaintCard key={complaint.id} complaint={complaint} />
                             ))}
                         </div>
@@ -346,7 +359,7 @@ export default function SearchComplaintPage() {
 
                 {/* Pagination */}
                 {!loading && (
-                    <Pagination current={currentPage} total={totalPages} onPageChange={setCurrentPage} />
+                    <Pagination current={currentPage} total={totalPages} onPageChange={handleNextPage} />
                 )}
 
             </div>
