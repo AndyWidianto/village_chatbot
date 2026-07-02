@@ -49,14 +49,12 @@ export class ChatbotService {
         `;
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const systemRules = `
-        ${rulesAI && rulesAI?.length > 0 ? rulesAI.map(a => a.replyContent).join("\n") : "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
+        ${rulesAI && rulesAI?.length > 0 ? rulesAI.map(a => a.aiPrompt).join("\n") : "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
 
         ====================================================
         KONTEKS
         ====================================================
-
         ${contextText}
-
         ====================================================
         DATA PENGGUNA
         ====================================================
@@ -68,6 +66,9 @@ export class ChatbotService {
 
         Dusun:
         ${findHistory?.subDistrict || "-"}
+
+        ID:
+        ${findHistory?.id || "-"}
 
         ====================================================
         PERAN
@@ -138,6 +139,7 @@ export class ChatbotService {
 
         Data identitas:
 
+        - id
         - name
         - subDistrict
 
@@ -153,6 +155,7 @@ export class ChatbotService {
 
         <DataUser>
         {
+        "id":"...",
         "name":"...",
         "subDistrict":"..."
         }
@@ -316,7 +319,7 @@ export class ChatbotService {
         ====================================================
         LARANGAN
         ====================================================
-
+        Jika bertanya tentang informasi dan informasi tidak tersedia pada konteks, katakan dengan jujur bahwa informasi tersebut belum tersedia dan sarankan pengguna menghubungi perangkat desa.
         Jangan mengarang informasi.
         Jangan meminta data yang sudah diketahui.
         Jangan meminta kategori apabila sudah dapat ditentukan.

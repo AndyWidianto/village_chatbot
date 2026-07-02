@@ -1,8 +1,10 @@
 import { CreateCitizenDto, UpdateCitizenDto } from "@/lib/dto/citizen.dto";
 import { PrismaService } from "@/lib/prisma/prisma.service";
 import { PayloadJWT } from "@/lib/types";
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ChatPlatform, Citizen, Prisma } from "@prisma/client";
+import type { Cache } from "cache-manager";
 
 
 
@@ -10,7 +12,8 @@ import { ChatPlatform, Citizen, Prisma } from "@prisma/client";
 @Injectable()
 export class CitizenService {
     constructor(
-        private prisma: PrismaService
+        private prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) {}
 
     validateRole(user: PayloadJWT) {
@@ -77,12 +80,22 @@ export class CitizenService {
                 platform: platform
             }
         }
+        const existingCache = await this.cacheManager.get(`citizens:${search || "all"}:${lastId || "first"}:${limit}:${platform || "all"}`);
+        if (existingCache) {
+            return existingCache;
+        }
         const [citizens, totalCitizen] = await this.prisma.$transaction([
             this.prisma.citizen.findMany(query),
             this.prisma.citizen.count({
                 where: query.where
             })
         ]);
+        await this.cacheManager.set(`citizens:${search || "all"}:${lastId || "first"}:${limit}:${platform || "all"}`, {
+            data: citizens,
+            nextId: citizens.length > 0 ? citizens[citizens.length - 1].id : null,
+            total: totalCitizen,
+            totalPage: Math.ceil(totalCitizen / limit)
+        }, 3 * 60 * 1000);
         return {
             data: citizens,
             nextId: citizens.length > 0 ? citizens[citizens.length - 1].id : null,

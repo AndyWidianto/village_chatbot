@@ -113,7 +113,7 @@ export class WebhookService {
                 where: { id: number }
             });
             if (!citizen) {
-                await this.citizenService.create({
+                const citizen = await this.citizenService.create({
                     fullName: pushName,
                     phoneNumber: number,
                     platform: "WHATSAPP",
@@ -122,7 +122,7 @@ export class WebhookService {
                     nik: ""
                 });
                 const newHistory = {
-                    id: remoteJid,
+                    id: citizen.id,
                     pushName: null,
                     number: number,
                     subDistrict: null,
@@ -133,7 +133,7 @@ export class WebhookService {
                 historyChat = newHistory;
             } else {
                 historyChat = {
-                    id: citizen.platformId,
+                    id: citizen.id,
                     number: citizen.id,
                     chat: [],
                     pushName: citizen.fullName,

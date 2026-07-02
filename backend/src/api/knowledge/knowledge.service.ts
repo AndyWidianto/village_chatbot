@@ -1,11 +1,13 @@
 import { PrismaService } from "../../lib/prisma/prisma.service";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateKnowledgeAI, PayloadJWT } from "../../lib/types";
 import * as XLSX from 'xlsx';
 import { Prisma } from "@prisma/client";
 import { OllamaService } from "../../lib/agent/ollama.service";
 import { TypeNotification } from "../../lib/shared/notification";
 import { GeminiService } from "@/lib/agent/gemini.service";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import type { Cache } from "cache-manager";
 
 const pdf = require('pdf-parse-fork');
 
@@ -16,7 +18,8 @@ export class KnowledgeService {
     constructor(
         private prisma: PrismaService,
         private ollama: OllamaService,
-        private gemini: GeminiService
+        private gemini: GeminiService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     async createKnowledge(user: PayloadJWT, data: CreateKnowledgeAI) {
@@ -173,14 +176,22 @@ export class KnowledgeService {
                 ]
             };
         }
-
+        const existingCache = await this.cacheManager.get(`knowledges:${search || "all"}:${lastId || "first"}:${limit}`);
+        if (existingCache) {
+            return existingCache;
+        }
         const [knowledges, totalKnowledge] = await this.prisma.$transaction([
             this.prisma.knowledge.findMany(query),
             this.prisma.knowledge.count()
         ]);
         const totalPage = Math.ceil(totalKnowledge / limit);
         const nextCursor = knowledges.length === limit ? knowledges[knowledges.length - 1].id : null;
-
+        await this.cacheManager.set(`knowledges:${search || "all"}:${lastId || "first"}:${limit}`, {
+            knowledges,
+            totalPage,
+            nextCursor,
+            totalData: totalKnowledge
+        }, 10 * 60 * 1000);
         return {
             knowledges,
             totalPage,

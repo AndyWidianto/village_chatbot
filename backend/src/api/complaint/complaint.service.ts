@@ -2,8 +2,10 @@ import { CloudinaryService } from "@/lib/cloudinary/cloudinary.service";
 import { CreateCompalintDto, UpdateComplaintDto } from "@/lib/dto/complaint.dto";
 import { PrismaService } from "@/lib/prisma/prisma.service";
 import { PayloadJWT } from "@/lib/types";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, ComplaintCategory, ComplaintStatus } from "@prisma/client";
+import type { Cache } from "cache-manager";
 
 
 @Injectable()
@@ -11,7 +13,8 @@ export class ComplaintService {
 
     constructor(
         private prisma: PrismaService,
-        private cloudinary: CloudinaryService
+        private cloudinary: CloudinaryService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     validateRole(user: PayloadJWT) {
@@ -30,7 +33,7 @@ export class ComplaintService {
                 ...data,
                 ticketNumber: tiketNumber.toString()
             }
-        })
+        });
         return complaint;
     }
     async update(user: PayloadJWT, id: string, data: UpdateComplaintDto) {
@@ -84,12 +87,22 @@ export class ComplaintService {
                 id: "desc"
             }
         };
+        const existingCache = await this.cacheManager.get(`complaints:${search || "all"}:${lastId || "first"}:${limit}`);
+        if (existingCache) {
+            return existingCache;
+        }
         const [complaints, totalComplaint] = await this.prisma.$transaction([
             this.prisma.complaint.findMany(query),
             this.prisma.complaint.count({
                 where: query.where
             })
         ]);
+        await this.cacheManager.set(`complaints:${search || "all"}:${lastId || "first"}:${limit}`, {
+            data: complaints,
+            total: totalComplaint,
+            totalPage: Math.ceil(totalComplaint / limit),
+            nextId: complaints.length > 0 ? complaints[complaints.length - 1].id : null
+        }, 10 * 60 * 1000);
         return {
             data: complaints,
             total: totalComplaint,
@@ -193,12 +206,22 @@ export class ComplaintService {
                 }
             }
         };
+        const existingCache = await this.cacheManager.get(`complaints:${search || "all"}:${lastId || "first"}:${limit}`);
+        if (existingCache) {
+            return existingCache;
+        }
         const [complaints, totalComplaint] = await this.prisma.$transaction([
             this.prisma.complaint.findMany(query),
             this.prisma.complaint.count({
                 where: query.where
             })
         ]);
+        await this.cacheManager.set(`complaints:${search || "all"}:${lastId || "first"}:${limit}`, {
+            data: complaints,
+            total: totalComplaint,
+            totalPage: Math.ceil(totalComplaint / limit),
+            nextId: complaints.length > 0 ? complaints[complaints.length - 1].id : null
+        }, 10 * 60 * 1000);
         return {
             data: complaints,
             total: totalComplaint,
