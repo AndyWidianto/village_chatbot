@@ -12,6 +12,7 @@ import { ConfigService } from "@nestjs/config";
 import { Autoreply, StatusDevice } from "@prisma/client";
 import type { Cache } from "cache-manager";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { CACHE_RAM_AUTOREPLY } from "@/lib/constant/constant-cache";
 
 
 
@@ -89,7 +90,8 @@ export class WebhookService {
     }
 
     async messageUpsert(instaceName: string, remoteJid: string, message: string, pushName: string, base64?: string) {
-        let autoreply: Autoreply | undefined = await this.cacheManager.get<Autoreply>(`autoreply:${message}`);
+        console.time("aiResponse");
+        let autoreply: Autoreply | undefined = CACHE_RAM_AUTOREPLY[message];
         if (!autoreply) {
             const existing = await this.prisma.autoreply.findFirst({
                 where: {
@@ -102,7 +104,7 @@ export class WebhookService {
                 }
             });
             if (existing) {
-                await this.cacheManager.set(`autoreply:${message}`, existing, 10 * 60 * 1000);
+                CACHE_RAM_AUTOREPLY[message] = existing;
                 autoreply = existing;
             }
         }
@@ -153,7 +155,6 @@ export class WebhookService {
         } else {
             const chatbot = await this.chatbotService.chatbot({ id: number, message: message });
             if (chatbot?.answer) {
-                console.log("Jawaban ai: ", chatbot.answer);
                 let aiResponse = chatbot.answer;
                 const complaintRegex = /<DataComplaint>([\s\S]*?)<\/DataComplaint>/;
                 const userRegex = /<DataUser>([\s\S]*?)<\/DataUser>/;
@@ -186,10 +187,7 @@ export class WebhookService {
                     try {
                         const jsonString = match[1].trim();
                         const complaintData: ResultComplaint = JSON.parse(jsonString);
-
-                        console.log('🎉 Data Pengaduan Ditemukan!', complaintData);
                         if (complaintData.action === 'CREATE_COMPLAINT') {
-                            const cleanText = aiResponse.replace(complaintRegex, '').trim();
                             const newComplaint = await this.complaintService.create({
                                 category: complaintData.data.category,
                                 citizenId: number,
@@ -213,6 +211,7 @@ export class WebhookService {
                 ]);
             }
         }
+        console.timeEnd("aiResponse");
         await this.messageService.create({
             whatsappId: instaceName,
             remoteJid: remoteJid,
@@ -223,12 +222,11 @@ export class WebhookService {
             status: StatusMessage.sent
         }).catch(() => null);
 
-        const MAX_HISTORY = 10;
+        const MAX_HISTORY = 15;
         if (historyChat.chat.length > MAX_HISTORY) {
             historyChat.chat.splice(0, historyChat.chat.length - MAX_HISTORY);
         }
         CACHE_RAM_HISTORY_CHAT[number] = historyChat;
-        console.log("Cache history: ", CACHE_RAM_HISTORY_CHAT)
         return { success: true };
     }
     convertMarkdownToWhatsApp(text: string) {
@@ -246,18 +244,4 @@ export class WebhookService {
 
         return formattedText.trim();
     }
-
-    // --- CONTOH PENGGUNAAN ---
-    //     const markdownInput = `
-    // **Ini Bold**
-    // *Ini Italic*
-    // ~~Ini Strikethrough~~
-    // ***Ini Bold Italic***
-    // **~~Bold Strike~~**
-    // > Ini adalah quote
-    // - List item 1
-    // - List item 2
-    // 1. Siji
-    // 2. Loro
-    // `;
 }

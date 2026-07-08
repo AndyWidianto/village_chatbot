@@ -13,6 +13,7 @@ export class AuthService {
     ) { }
 
     async Login({ email, password }: Login) {
+        console.time("ResponseLogin");
         const user = await this.prisma.user.findUnique({
             where: { email },
         });
@@ -30,6 +31,7 @@ export class AuthService {
             where: { id: user.id },
             data: { refreshToken: refreshToken }
         })
+        console.timeEnd("ResponseLogin");
         return { accessToken, refreshToken, user: {
             id: user.id,
             name: user.name,
